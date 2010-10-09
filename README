@@ -3,17 +3,20 @@ Hi, this is tagsystem
 Beware: it connects to the database and drop
 tables upon compilation!
 
-make             compile what is needed
+make             compile on demand
+make run         compile on demand, then run
 
-make force       always compiles everything
+make force       always compiles
+make all         compile program and doc
+make doc         generate all doc
+
 make clean       cleanup generated files
 
-make tagsystem   generates only the program
-make doc         generates only documentation
+make html        generate html documentation
+make tex         generate latex documentation
+make pdf         generate pdf documentation
 
 make mli         output the interface to stdout
-
-make run         compile what is needed, then run
 
 
 Ugly: the way the host to connect is setup

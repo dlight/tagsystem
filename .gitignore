@@ -5,3 +5,5 @@
 src/*.cm?
 bin/*
 html/*
+tex/*
+texput.log

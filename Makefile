@@ -2,42 +2,52 @@
 PROJECT := tagsystem
 
 MODULES := db tagsystem
-
-PKG := pgocaml,batteries,pgocaml.syntax
+PKG     := pgocaml,batteries,pgocaml.syntax
 
 #--------------------------------------------------#
 OPT := -I src -package $(PKG) -syntax camlp4o
 
 COMP_OPT := $(OPT) -c
 LINK_OPT := $(OPT) -linkpkg -thread
-
-DOC_OPT := $(OPT) -html -stars -sort
+DOC_OPT  := $(OPT) -stars -sort
 
 COMMAND := PGHOST=localhost ocamlfind ocamlc
+DOC     := ocamlfind ocamldoc $(DOC_OPT)
 
+BIN     := bin/$(PROJECT)
 OBJECTS := $(patsubst %,src/%.cmo, $(MODULES))
 SOURCES := $(patsubst %,src/%.ml, $(MODULES))
 
 #--------------------------------------------------#
-all:         $(PROJECT) doc
-force:       clean all
-$(PROJECT):  bin/$(PROJECT)
+$(PROJECT):  $(BIN)
 
-run:   all
+all:         $(PROJECT) doc
+doc:         html tex pdf
+force:       clean all
+
+run: $(PROJECT)
 	./run
 
 clean:
-	rm -f html/* src/*.cm? bin/$(PROJECT)
+	rm -f $(BIN) src/*.cm? html/* tex/*
 mli:
 	$(COMMAND) $(COMP_OPT) -i src/*.ml
 
-doc: $(PROJECT)
-	@mkdir -p html
-	ocamlfind ocamldoc $(DOC_OPT) -d html \
-	$(SOURCES) 
-
 #--------------------------------------------------#
-bin/$(PROJECT): $(OBJECTS)
+html: $(BIN)
+	@mkdir -p html
+	$(DOC) -html -d html \
+	$(SOURCES)
+
+tex: $(BIN)
+	@mkdir -p tex
+	$(DOC) -latex -o tex/tagsystem.tex \
+	$(SOURCES)
+
+pdf: tex
+	cd tex; pdflatex tagsystem.tex
+
+$(BIN): $(OBJECTS)
 	@mkdir -p bin
 	$(COMMAND) $(LINK_OPT) \
 	$^ -o $@
