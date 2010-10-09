@@ -37,7 +37,6 @@ end
 module D = struct
   let connect () = PGOCaml.connect ()
 
-  let create = Db.create_db
   let insert_file = Db.insert_file
   let insert_set = Db.insert_set
 

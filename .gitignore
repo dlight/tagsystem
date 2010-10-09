@@ -6,4 +6,5 @@ src/*.cm?
 bin/*
 html/*
 tex/*
+dump/*
 texput.log

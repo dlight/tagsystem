@@ -56,3 +56,16 @@ src/%.cmo: src/%.ml
 	$(COMMAND) $(COMP_OPT) \
 	$^
 	@echo
+
+destroy: $(OBJECTS)
+	@if [ `whoami` = dev ]; then \
+		make really-destroy; \
+	else \
+		echo VCVCVC ESTA LOUCO AAAAAAAA; \
+	fi
+
+really-destroy: $(OBJECTS)
+	@mkdir -p dump
+	pg_dump > dump/`date "+%Y-%m-%d.%H-%m-%S"`
+	$(COMMAND) $(LINK_OPT) \
+	src/createdb.ml $^ -o $(BIN)
