@@ -2,7 +2,13 @@ PROJECT := test
 LINK_PKG := pgocaml
 COMP_PKG := pgocaml,pgocaml.syntax
 
+.PHONY: all
+.PHONY: clean
+
 all: $(PROJECT)
+
+clean:
+	rm -f *.cm? $(PROJECT)
 
 $(PROJECT): $(PROJECT).cmo
 	ocamlfind ocamlc -package $(LINK_PKG) -linkpkg -o $@ $<
