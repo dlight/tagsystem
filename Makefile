@@ -1,29 +1,35 @@
 PROJECT := tagsystem
 
+MODULES := db tagsystem
+
 LINK_PKG := pgocaml,batteries
 COMP_PKG := pgocaml,batteries,pgocaml.syntax
 
-H := PGHOST=localhost
+#--------------------------------------------------#
+OPT := -I src
 
-COMMAND := $(H) ocamlfind ocamlc -package
+LINK_OPT := -package $(LINK_PKG) -linkpkg -thread
+COMP_OPT := -package $(COMP_PKG) -syntax camlp4o -c
 
-OBJECTS := $(patsubst %.ml,%.cmo,$(wildcard src/*.ml))
+COMMAND := PGHOST=localhost ocamlfind ocamlc $(OPT)
+OBJECTS := $(patsubst %,src/%.cmo, $(MODULES))
 
-.PHONY: all
-.PHONY: clean
-.PHONE: mli
-
+#--------------------------------------------------#
 all: bin/$(PROJECT)
-
+force: clean all
+run: all
+	./run
 clean:
 	rm -f src/*.cm? bin/$(PROJECT)
-
 mli:
-	$(COMMAND) $(COMP_PKG) -i -syntax camlp4o *.ml
+	$(COMMAND) $(COMP_OPT) -i src/*.ml
 
+#--------------------------------------------------#
 bin/$(PROJECT): $(OBJECTS)
-	$(COMMAND) $(LINK_PKG) -linkpkg -thread -o $@ $^
+	$(COMMAND) $(LINK_OPT) \
+	$^ -o $@
 
 src/%.cmo: src/%.ml
-	$(COMMAND) $(COMP_PKG) -syntax camlp4o -I src -c $^
-
+	$(COMMAND) $(COMP_OPT) \
+	$^
+	@echo
