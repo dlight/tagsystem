@@ -2,9 +2,5 @@
 .*.swp
 .#*
 \#*#
-*.mli
-*.cm?
-*.cm??
-*.o
-*.a
-test
+src/*.cm?
+bin/*

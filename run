@@ -1,1 +1,1 @@
-PGHOST=localhost ./test
+PGHOST=localhost ./bin/tagsystem
