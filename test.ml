@@ -1,24 +1,51 @@
-let create_table dbh =
-  PGSQL(dbh) "execute"
-    "create temporary table users
-       (id    serial primary key,
-        name  text not null,
-        age   int not null)"
+(* for extension see http://sql.pastebin.com/SWSwx1ss
 
-let insert_user dbh name age =
-  PGSQL(dbh) "INSERT INTO users (name, age)
-                     VALUES ($name, $age)"
-let get_users dbh =
-  PGSQL(dbh) "SELECT id, name, age FROM users"
-let print_user (id, name, age) =
-  Printf.printf "Id: %ld Name: %s
-Age: %ld \n" id name age
+*)
+
+open Batteries
+open Printf
+
+type file = {
+  fid : int32;
+  path : string
+}
+
+let print_file o f =
+  fprintf o "{ %ld, %s }" f.fid f.path
+
+type set = {
+  sid : int32
+}
+
+let print_key o (s, e) =
+  fprintf o "(%ld, %ld)" s.sid e
+
+module M = struct
+  include Map.Make (struct type t = set * int32 let compare = compare end)
+  let print m = print print_key print_file stdout m
+end
+
+
+
+
+module D = struct
+  let connect () = PGOCaml.connect ()
+
+  let create = Db.create_db
+  let insert_file = Db.insert_file
+  let insert_set = Db.insert_set
+
+  let insert_rel = Db.insert_set_file
+
+  let read db =
+    let tuple_to_record acc (sid, pos, fid, path) =
+    M.add ({ sid = sid }, pos) { fid = fid; path = path } acc in
+      List.fold_left tuple_to_record M.empty (Db.get_set_file db)
+end
 
 let _ =
-  let dbh = PGOCaml.connect () in
-  let () = create_table dbh in
-  let () =
-    insert_user dbh "John" 30l;
-    insert_user dbh "Mary" 40l;
-    insert_user dbh "Mark" 42l in
-    List.iter print_user (get_users dbh)
+  let db = D.connect() in
+
+  let i = D.insert_file db "/test" in
+    List.iter (printf "aa %ld") i;
+    M.print (D.read db)
