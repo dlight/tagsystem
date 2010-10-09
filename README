@@ -19,12 +19,4 @@ make pdf         generate pdf documentation
 make mli         output the interface to stdout
 
 
-Ugly: the way the host to connect is setup
-
-Scattered in 3 files (Makefile for compile time,
-ocaml-script for toplevel, run for runtime)
-
-IDK how to connect to unix socket too
-
-
-Also there is not much more than a toy implemented
+There is not much more than a toy implemented

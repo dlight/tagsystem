@@ -1,4 +1,0 @@
-#!/bin/sh
-
-#UNIX_DOMAIN_SOCKET_DIR=/var/run/postgresql
-PGHOST=localhost ocaml

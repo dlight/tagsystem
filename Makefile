@@ -11,7 +11,7 @@ COMP_OPT := $(OPT) -c
 LINK_OPT := $(OPT) -linkpkg -thread
 DOC_OPT  := $(OPT) -stars -sort
 
-COMMAND := PGHOST=localhost ocamlfind ocamlc
+COMMAND := ocamlfind ocamlc
 DOC     := ocamlfind ocamldoc $(DOC_OPT)
 
 BIN     := bin/$(PROJECT)
@@ -23,7 +23,7 @@ $(PROJECT):  $(BIN)
 
 all:         $(PROJECT) doc
 doc:         html tex pdf
-force:       clean all
+force:       clean $(PROJECT)
 
 run: $(PROJECT)
 	./run
