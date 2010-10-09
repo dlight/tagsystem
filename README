@@ -1,0 +1,27 @@
+Hi, this is tagsystem
+
+Beware: it connects to the database and drop
+tables upon compilation!
+
+make             compile what is needed
+
+make force       always compiles everything
+make clean       cleanup generated files
+
+make tagsystem   generates only the program
+make doc         generates only documentation
+
+make mli         output the interface to stdout
+
+make run         compile what is needed, then run
+
+
+Ugly: the way the host to connect is setup
+
+Scattered in 3 files (Makefile for compile time,
+ocaml-script for toplevel, run for runtime)
+
+IDK how to connect to unix socket too
+
+
+Also there is not much more than a toy implemented
