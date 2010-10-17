@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [[ $(whoami) != dev ]]; then
+    echo VCVCVC ESTA LOUCO AAAAAAAAAA
+    exit
+fi
+
+cd "$(dirname "$0")"/..
+
+createml() {
+    f="$(mktemp /tmp/createdbXXX.ml)"
+
+awk -f - src/schema.sql > "$f" << "wka"
+    BEGIN { RS=";"; print "let create db =" }
+      /./ { print "PGSQL(db) \"execute\" \"" $0 "\";" }
+      END { print "()" }
+wka
+
+    echo "$f"
+}
+
+f="$(createml)"
+o="$(mktemp /tmp/createdbXXX)"
+
+mkdir -p dump
+pg_dump > dump/`date "+%Y-%m-%d.%H-%m-%S"`
+
+ocamlfind ocamlc \
+    -package pgocaml,pgocaml.syntax \
+    -syntax camlp4o -linkpkg -thread \
+    -o "$o" "$f"
+
+rm -f "$o" "$f" /tmp/createdb???.cm?
