@@ -14,10 +14,10 @@ OCAMLPACKS[] =
 
 OBJECTS[] =
     db
-    tagsystem
+    batch
 
 OCamlProgram($(BIN)/ts-batch, $(OBJECTS))
-OCamlDocProgram($(BIN)/ts-batch, $(OBJECTS))
+#OCamlDocProgram($(BIN)/ts-batch, $(OBJECTS))
 
 .PHONY: bin: $(BIN)/ts-batch
 
