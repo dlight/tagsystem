@@ -9,3 +9,5 @@ tex/*
 dump/*
 texput.log
 *.omc
+.omakedb
+.omakedb.lock

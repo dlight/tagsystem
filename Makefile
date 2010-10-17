@@ -52,7 +52,7 @@ $(BIN): $(OBJECTS)
 	$(COMMAND) $(LINK_OPT) \
 	$^ -o $@
 
-src/%.cmo: src/%.ml
+src/%.cmo: src/%.ml $(shell echo $(SOURCES) | sed 's:$(^).*::' | tee /tmp/a)
 	$(COMMAND) $(COMP_OPT) \
 	$^
 	@echo
@@ -64,8 +64,8 @@ destroy: $(OBJECTS)
 		echo VCVCVC ESTA LOUCO AAAAAAAA; \
 	fi
 
-really-destroy: $(OBJECTS)
+really-destroy: src/createdb.cmo $(OBJECTS)
 	@mkdir -p dump
 	pg_dump > dump/`date "+%Y-%m-%d.%H-%m-%S"`
 	$(COMMAND) $(LINK_OPT) \
-	src/createdb.ml $^ -o $(BIN)
+	$^ -o $(BIN)
