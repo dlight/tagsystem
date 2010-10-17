@@ -1,0 +1,6 @@
+.SUBDIRS: src
+
+.PHONY: clean: .PHONY/src/clean
+
+.PHONY: mrproper: .PHONY/clean
+	rm -f .omakedb* *.omc src/*.omc bin/* html/*

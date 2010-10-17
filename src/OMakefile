@@ -1,0 +1,27 @@
+NATIVE_ENABLED = false
+BYTE_ENABLED = true
+
+USE_OCAMLFIND = true
+
+OCAMLFLAGS += -thread -syntax camlp4o
+OCAMLDEPFLAGS += -syntax camlp4o
+
+OCAMLPACKS[] =
+    batteries
+    pgocaml
+    pgocaml.syntax
+#    camlp4.macro
+
+OBJECTS[] =
+    db
+    tagsystem
+
+OCamlProgram($(BIN)/ts-batch, $(OBJECTS))
+OCamlDocProgram($(BIN)/ts-batch, $(OBJECTS))
+
+.PHONY: bin: $(BIN)/ts-batch
+
+.DEFAULT: bin
+
+.PHONY: clean:
+	rm -f *.cm?

@@ -8,3 +8,4 @@ html/*
 tex/*
 dump/*
 texput.log
+*.omc
