@@ -6,29 +6,29 @@ open Printf
 
 (** Internalized files *)
 type file = {
-  fid : int32;      (** File id *)
+  fid : int64;      (** File id *)
   path : string     (** Unique path for the file *)
 }
 
 (** Set of files *)
 type set = {
-  sid : int32       (** Set id *)
+  sid : int64       (** Set id *)
 }
 
 
 (** Maps a (set, position) pair to a file *)
 module M = struct
   include Map.Make (struct
-                      type t = set * int32
+                      type t = set * int64
                       let compare = compare end)
 
   (** Prints a file *)
   let print_key o (s, e) =
-    fprintf o "(%ld, %ld)" s.sid e
+    fprintf o "(%Ld, %Ld)" s.sid e
 
   (** Prints a file *)
   let print_file o f =
-    fprintf o "{ %ld, %s }" f.fid f.path
+    fprintf o "{ %Ld, %s }" f.fid f.path
 
   (** Prints a map *)
   let print m = print print_key print_file stdout m
@@ -54,6 +54,6 @@ let _ =
   let db = D.connect() in
 
   let i = D.insert_file db "/test" in
-    List.iter (printf "aa %ld") i;
+    List.iter (printf "aa %Ld") i;
     M.print (D.read db)
 

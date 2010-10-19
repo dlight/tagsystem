@@ -1,3 +1,4 @@
+open Batteries
 open Filename
 open File
 open Printf
@@ -27,7 +28,7 @@ class file num origin =
   let len = size_of origin in
   let mime = Magic.file cookie origin in
   let dir' = concat dir mime in
-  let dirn = concat dir' (string_of_int num) in
+  let dirn = concat dir' (sprintf "%Ld" num) in
   let ext, rel = ext_rel_of_mime mime in
   let name = sprintf "%s-%d.%s" md5 len ext in
 object(self)
@@ -59,3 +60,5 @@ let compose n dir acc f =
 
 let of_dir n dir =
   Array.fold_left (compose n dir) [] (readdir dir)
+
+let _ = print_int 1

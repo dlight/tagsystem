@@ -11,12 +11,14 @@ OCAMLPACKS[] =
     pgocaml
     pgocaml.syntax
     magic
+    fileutils
 
 SOURCES_BATCH[] =
     db
     batch
 
 SOURCES_DIR[] =
+    db
     dir
 
 OCamlProgram($(BIN)/ts-batch, $(SOURCES_BATCH))
