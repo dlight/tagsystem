@@ -1,0 +1,31 @@
+#!/bin/sh
+
+src() {
+    echo "$(dirname "$0")/../src/$1"
+}
+
+seep() {
+    awk -f - "$(src OMakefile)" <<"EOF"
+BEGIN { RS=""; ORS="" }
+
+/^OCAMLPACKS/ {
+  for (i = 3; i < NF; i = i + 1) {
+    print $i ","
+  }
+  print $NF
+  print "\n"
+}
+
+EOF
+}
+
+if [ -n "$1" ]; then src="$1"
+                else src="$(src db.ml)"; fi
+
+packages="$(seep)"
+#packages="pgocaml,pgocaml.syntax"
+
+ocamlfind ocamlc \
+    -package "$packages" \
+    -syntax camlp4o -linkpkg -thread \
+    -I src -i "$src"
