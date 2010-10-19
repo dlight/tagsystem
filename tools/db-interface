@@ -1,0 +1,8 @@
+#!/bin/sh
+
+cd "$(dirname "$0")"/..
+
+ocamlfind ocamlc \
+    -package pgocaml,pgocaml.syntax \
+    -syntax camlp4o -linkpkg -thread \
+    -i src/db.ml
