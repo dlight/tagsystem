@@ -10,16 +10,19 @@ OCAMLPACKS[] =
     batteries
     pgocaml
     pgocaml.syntax
-#    camlp4.macro
+    magic
 
-OBJECTS[] =
+SOURCES_BATCH[] =
     db
     batch
 
-OCamlProgram($(BIN)/ts-batch, $(OBJECTS))
-#OCamlDocProgram($(BIN)/ts-batch, $(OBJECTS))
+SOURCES_DIR[] =
+    dir
 
-.PHONY: bin: $(BIN)/ts-batch
+OCamlProgram($(BIN)/ts-batch, $(SOURCES_BATCH))
+OCamlProgram($(BIN)/ts-dir, $(SOURCES_DIR))
+
+.PHONY: bin: $(BIN)/ts-batch $(BIN)/ts-dir
 
 .DEFAULT: bin
 

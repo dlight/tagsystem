@@ -15,3 +15,7 @@ let get_set_file db =
                     from set, file, set_file
                     where (set_file.set_id = set.id and
                            set_file.file_id = file.id)"
+
+let begin_new_set db dir url =
+  PGSQL(db) "insert into new_set (dir, url)
+                   values ($dir, $url) returning id"
