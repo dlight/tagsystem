@@ -2,6 +2,8 @@ require 'rubygems'
 require 'sequel'
 require 'sinatra'
 
+set :environment, :production
+
 set :run, true
 set :port, 1025
 
@@ -34,5 +36,5 @@ __END__
 @@ set
 %a{ :href => '/' } "Up"
 %br
-- @db.fetch("select path from file where id in (select file_id from set_file where set_id = #{@id} order by pos desc)") do |r|
+- @db.fetch("select path from file where image = true and id in (select file_id from set_file where set_id = #{@id} order by pos desc)") do |r|
     %img{ :src => "http://127.0.0.1:4567#{r[:path]}" }
