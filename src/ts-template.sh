@@ -10,7 +10,7 @@ shift
 
 case "$c" in
     add) ./bin/ts-add "$@";;
-    rm) rm -r "$files_dir";;
+    rm) rm -r "$files_dir"/?*;;
     createdb) ./tools/createdb-simpler;;
     interface) ./tools/interface "$@";;
     *) cat "$0";;
