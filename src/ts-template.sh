@@ -13,5 +13,6 @@ case "$c" in
     rm) rm -r "$files_dir"/?*;;
     createdb) ./tools/createdb-simpler;;
     interface) ./tools/interface "$@";;
+    web) ./web/ts-web;;
     *) cat "$0";;
 esac
