@@ -8,6 +8,7 @@ OCAMLDEPFLAGS += -syntax camlp4o
 
 OCAMLPACKS[] =
     batteries
+    str
     pgocaml
     pgocaml.syntax
     magic
@@ -17,14 +18,20 @@ SOURCES_BATCH[] =
     db
     batch
 
-SOURCES_DIR[] =
-    db
+SOURCES_ADD[] =
+    msort
     dir
+    db
+    add
 
-OCamlProgram($(BIN)/ts-batch, $(SOURCES_BATCH))
-OCamlProgram($(BIN)/ts-dir, $(SOURCES_DIR))
+#OCamlProgram($(BIN)/ts-batch, $(SOURCES_BATCH))
+OCamlProgram($(BIN)/ts-add, $(SOURCES_ADD))
 
-.PHONY: bin: $(BIN)/ts-batch $(BIN)/ts-dir
+$(BIN)/ts: ts-template.sh
+    sed "s:__ROOT__:$(shell realpath $(ROOT)):" ts-template.sh > $(BIN)/ts
+    chmod(755, $(BIN)/ts)
+
+.PHONY: bin: $(BIN)/ts $(BIN)/ts-add
 
 .DEFAULT: bin
 

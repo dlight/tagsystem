@@ -6,9 +6,14 @@ open Sys
 
 (* I may remove this dependency *)
 let mkdir dir = FileUtil.mkdir ~parent:true dir
-let mv = FileUtil.mv
 
-type ('a, 'b) either = Left of 'a | Right of 'b
+(*let mv = FileUtil.mv*)
+
+let link a b =
+  try Unix.link a b with
+      Unix.Unix_error (Unix.EEXIST, _, _) -> ()
+
+(*type ('a, 'b) either = Left of 'a | Right of 'b*)
 
 let cookie = Magic.make ~flags:[Magic.Mime] []
 
@@ -23,17 +28,19 @@ let ext_rel_of_mime = function
   | _ -> "dat", false
 
 
-class file num origin =
+class file num origin (pos : int) =
   let md5 = Digest.to_hex (Digest.file origin) in
-  let len = size_of origin in
+  let size = size_of origin in
   let mime = Magic.file cookie origin in
   let dir' = concat dir mime in
   let dirn = concat dir' (sprintf "%Ld" num) in
   let ext, rel = ext_rel_of_mime mime in
-  let name = sprintf "%s-%d.%s" md5 len ext in
+  let name = sprintf "%s-%d.%s" md5 size ext in
 object(self)
+  method set_id = num
+  method pos = Int64.of_int pos
   method md5 = md5
-  method len = len
+  method size = Int64.of_int size
   method mime = mime
   method prev_dir = dirname origin
   method prev_name = basename origin
@@ -41,9 +48,9 @@ object(self)
   method dir = dirn
   method name = name
   method path = concat dirn name
-  method relevant = rel
+  method image = rel
   method mkdir = mkdir dirn
-  method mv = mv self#prev_path self#path
+  method link = link self#prev_path self#path
 end
  
 
@@ -51,14 +58,32 @@ end
   try Left (new file file) with
       e -> Right e*)
 
-let compose n dir acc f =
+let readlink f =
+  try Some (Unix.readlink f) with
+      Unix.Unix_error (Unix.EINVAL, "readlink", _) -> None
+
+let rec sym_dir f =
+  if not (file_exists f) then
+    false
+  else if is_directory f then
+    true else
+    match readlink f with
+        Some f -> sym_dir f
+      | None -> false
+
+let files dir =
+  let a = Array.filter (fun f -> let f' = concat dir f in
+                  file_exists f'
+                  && not (sym_dir f')) (readdir dir) in
+    Msort.sort a;
+    a
+
+let compose n dir acc i f =
   let f' = concat dir f in
-  if not (file_exists f') || is_directory f' then
-    acc
-  else
-    (new file n f')::acc
+    (new file n f' i)::acc
 
-let of_dir n dir =
-  Array.fold_left (compose n dir) [] (readdir dir)
+let of_dir n files dir =
+  Array.fold_lefti (compose n dir) [] files
 
-let _ = print_int 1
+let mkdir_l l = List.iter (fun x -> x#mkdir) l
+

@@ -1,14 +1,36 @@
-(** Ahm *)
+open CalendarLib
+open Printf
+open Dir
 
-let insert_file db path =
-  PGSQL(db) "insert into file (path) values ($path) returning id"
+let read_id = function
+    [] -> raise (Failure "qqq no id? (inserting file/set)")
+  | id::_ -> id
 
-let insert_set db =
-  PGSQL(db) "insert into set default values returning id"
+let insert_set db dir =
+  let l = PGSQL(db) "insert into set (dir)
+                    values ($dir) returning id" in
+    read_id l
 
-let insert_set_file db set_id name_id pos =
-  PGSQL(db) "insert into set_file (set_id, file_id, pos)
-                    values ($set_id, $name_id, $pos)"
+
+
+let select_file_param db md5 mime size =
+  let l = PGSQL(db) "select id from file
+                      where md5 = $md5 and
+                            mime = $mime and
+                            size = $size" in
+    match l with
+        [] -> None
+      | a::_ -> Some a 
+
+let insert_file db md5 mime size path image =
+  let l = PGSQL(db) "insert into file (md5, mime, size, path, image)
+                    values ($md5, $mime, $size, $path, $image)
+                    returning id" in
+    read_id l
+
+let insert_set_file db set_id pos file_id filename =
+  PGSQL(db) "insert into set_file (set_id, pos, file_id, filename)
+                    values ($set_id, $pos, $file_id, $filename)"
 
 let get_set_file db =
   PGSQL(db) "select set.id, set_file.pos, file.id, file.path
@@ -16,6 +38,25 @@ let get_set_file db =
                     where (set_file.set_id = set.id and
                            set_file.file_id = file.id)"
 
-let begin_new_set db dir url =
-  PGSQL(db) "insert into new_set (dir, url)
-                   values ($dir, $url) returning id"
+(* hard to manage? *)
+
+let fid_if_exists db md5 mime size path image =
+  match select_file_param db md5 mime size with
+      Some a -> a
+    | None -> insert_file db md5 mime size path image
+
+let unpack file =
+  (file#md5, file#mime, file#size, file#path, file#image,
+   file#pos, file#prev_name)
+
+let insert_file_rel db set_id file =
+  let md5, mime, size, path, image,
+    pos, filename = unpack file in
+    PGOCaml.begin_work db;
+    let file_id =
+      fid_if_exists db md5 mime size path image in
+
+      insert_set_file db set_id pos file_id filename;
+      PGOCaml.commit db
+
+let connect () = PGOCaml.connect ()
