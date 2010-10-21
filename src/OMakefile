@@ -13,12 +13,14 @@ OCAMLPACKS[] =
     pgocaml.syntax
     magic
     fileutils
+    extunix
 
 SOURCES_BATCH[] =
     db
     batch
 
 SOURCES_ADD[] =
+    stat
     msort
     dir
     db

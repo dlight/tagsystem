@@ -2,6 +2,8 @@ open Dir
 open Db
 open Printf
 
+module U = ExtUnix.Specific
+
 let add_file db set_id file =
   (try file#link with e ->
      Printf.printf "%s %s\n" file#prev_path file#path;
@@ -29,4 +31,4 @@ let handle d =
 
 let _ = match arg with
     None -> print_endline "Rs"
-  | Some a -> handle a
+  | Some a -> handle (U.realpath a)
