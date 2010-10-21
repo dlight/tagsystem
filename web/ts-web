@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cd "$(dirname "$0")"/..
+
+ruby19 -rrubygems web/web.rb
