@@ -4,11 +4,16 @@ open Printf
 
 module U = ExtUnix.Specific
 
+let link_file db file =
+  match select_file_param db file#md5 file#mime file#size with
+      None -> (try file#link with e ->
+                 Printf.printf "Aiai link: %s -> %s\n\n" file#prev_path file#path;
+                 raise e); None
+    | Some a -> Some a
+
 let add_file db set_id file =
-  (try file#link with e ->
-     Printf.printf "%s %s\n" file#prev_path file#path;
-     raise e);
-  insert_file_rel db set_id file
+  let file_id' = link_file db file in
+  insert_file_rel db file_id' set_id file
 
 let add db dir fs =
   let id = insert_set db dir in
