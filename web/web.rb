@@ -26,7 +26,7 @@ get '/page/:n' do |n|
   @half = 10
 
   @n = Integer(n)
-  @N = count()
+  @N = count_sets_nonempty()
 
   @last = @N / @gap
   @win = 2*@half + 1
@@ -96,7 +96,7 @@ __END__
   - if @n < @last
     %a{ :href => "/page/#{@last}" } >>
 
-- list_sets_by_page(@gap, @n) do |r|
+- list_nonempty_sets_by_page(@gap, @n) do |r|
   %p
     %a{ :href => "/set/#{r[:id]}" }
       =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'

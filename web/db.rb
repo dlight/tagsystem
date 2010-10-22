@@ -28,15 +28,26 @@ helpers do
                               file.image then 1 end) = 0") { |r| blk.call(r) }
   end
 
+  def list_nonempty_sets_by_page(gap, n, &blk)
+    $db.fetch("select id, dir from set where exists
+                 (select * from set_file join file on
+                    (set_file.file_id = file.id)
+                 where file.image
+                   and set_file.set_id = set.id) limit ? offset ? ",
+              gap, n * gap) { |r| blk.call(r) }
+  end
+
+
+
   def count_sets_nonempty()
-    $db.fetch("select count(*) from set where not exists
+    $db.fetch("select count(*) from set where exists
                  (select * from set_file join file on
                     (set_file.file_id = file.id)
                  where file.image
                    and set_file.set_id = set.id)").first[:count];
   end
   def count_sets_empty()
-    $db.fetch("select count(*) from set where exists
+    $db.fetch("select count(*) from set where not exists
                  (select * from set_file join file on
                     (set_file.file_id = file.id)
                  where file.image
