@@ -15,7 +15,15 @@ helpers do
     $db
   end
   def count()
-    $db.fetch("select count(*) from set")[''][:count]
+    $db.fetch("select count(*) from set").all[0][:count]
+  end
+
+  def get_file_by_set_id(id, &blk)
+    db.fetch("select file.path from set, file, set_file
+                where set.id = set_file.set_id
+                  and file.id = set_file.file_id
+                  and file.image = true
+                  and set.id = ? order by set_file.pos", id) { |r| blk.call(r) }
   end
 end
 
@@ -89,5 +97,5 @@ __END__
 @@ set
 %a{ :href => '/' } "Up"
 %br
-- db.fetch("select file.path from set, file, set_file where set.id = set_file.set_id and file.id = set_file.file_id and file.image = true and set.id = #{@id} order by set_file.pos") do |r|
+- get_file_by_set_id(@id) do |r|
     %img{ :src => "http://127.0.0.1:4567#{r[:path]}" }
