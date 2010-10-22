@@ -1,0 +1,10 @@
+delete a set, without deleting files
+
+
+begin;
+delete from set_file where set_id in
+  (select id from set_file, set
+    where set_id = id and dir = '/home/dev/a');
+delete from set
+ where set.dir = '/home/dev/a';
+commit;
