@@ -16,10 +16,11 @@ let add_file db set_id file =
   insert_file_rel db file_id' set_id file
 
 let add db dir fs =
-  let id = insert_set db dir in
-  let l = of_dir id fs dir in
+  let set_id = insert_set db dir in
+  let l = of_dir set_id fs dir in
     mkdir_l l;
-    List.iter (add_file db id) l
+    List.iter (add_file db set_id) l;
+    close_set db set_id
 
 let add_dir db dir =
   match files dir with

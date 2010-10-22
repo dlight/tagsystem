@@ -38,6 +38,9 @@ let get_set_file db =
                     where (set_file.set_id = set.id and
                            set_file.file_id = file.id)"
 
+let close_set db set_id =
+  PGSQL(db) "update set set is_open = false where id = $set_id"
+
 (* hard to manage? *)
 
 let fid_if_exists db md5 mime size path image = function
