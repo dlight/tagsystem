@@ -2,11 +2,11 @@ drop table if exists set_file, file, set;
 drop type if exists status;
 
 create table file
-       (id              serial8 primary key,
+       (file_id         serial8 primary key,
         md5             varchar(32) not null,
         mime            text not null,
-        size            int8 not null,
-        path            text not null unique,
+        file_size       int8 not null,
+        file_path       text not null unique,
 
         image           bool not null default false,
 
@@ -19,7 +19,7 @@ create table file
         dir_ctime       timestamp,
         dir_mtime       timestamp,
 
-        unique (md5, mime, size));
+        unique (md5, mime, file_size));
 
 -- create type .. enum ..
 
@@ -27,8 +27,8 @@ create table file
 -- principal true, user added true  -> regular (or essay?)
 -- principal false, user added true -> subset?
 
-create table set
-       (id          serial8 primary key,
+create table bag
+       (file_id      serial8 primary key,
 
         is_open      bool not null default true,
         principal    bool not null default false, -- principal and user_added can't be
