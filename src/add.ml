@@ -11,16 +11,16 @@ let link_file db file =
                  raise e); None
     | Some a -> Some a
 
-let add_file db set_id file =
+let add_file db bag_id file =
   let file_id' = link_file db file in
-  insert_file_rel db file_id' set_id file
+  insert_file_rel db file_id' bag_id file
 
 let add db dir fs =
-  let set_id = insert_set db dir in
-  let l = of_dir set_id fs dir in
+  let bag_id = insert_bag db dir in
+  let l = of_dir bag_id fs dir in
     mkdir_l l;
-    List.iter (add_file db set_id) l;
-    close_set db set_id
+    List.iter (add_file db bag_id) l;
+    close_bag db bag_id
 
 let add_dir db dir =
   match files dir with

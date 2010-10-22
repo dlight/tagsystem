@@ -12,7 +12,7 @@ shift
 
 case "$c" in
     add) "$BIN"/ts-add "$@";;
-    rm) rm -r "$files_dir"/?*;;
+    rm) rm -rf "$files_dir"/?*;;
     createdb) "$TOOLS"/createdb-simpler;;
     interface) "$TOOLS"/interface "$@";;
     web) "$WEB"/ts-web;;

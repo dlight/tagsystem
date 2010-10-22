@@ -5,11 +5,24 @@ require 'sass'
 
 require_relative 'db'
 
-set :environment, :production
+if "dev" == `whoami`.chomp("\n")
+  set :environment, :development
+else
+  set :environment, :production
+end
 
 set :run, true
 set :bind, '127.0.0.1'
-set :port, 1025
+
+configure :development do
+  set :port, 1026
+  $pre_dir = "dev"
+end
+
+configure :production do
+  set :port, 1026
+  $pre_dir = "prod"
+end
 
 $db = Sequel.connect('postgres://localhost')
 
@@ -26,7 +39,7 @@ get '/page/:n' do |n|
   @half = 10
 
   @n = Integer(n)
-  @N = count_sets_nonempty()
+  @N = count_bags_nonempty()
 
   @last = @N / @gap
   @win = 2*@half + 1
@@ -52,9 +65,9 @@ get '/empty' do
   haml :empty
 end
 
-get '/set/:id' do |id|
+get '/bag/:id' do |id|
   @id = id
-  haml :set
+  haml :bag
 end
 
 get '/style.css' do
@@ -96,30 +109,30 @@ __END__
   - if @n < @last
     %a{ :href => "/page/#{@last}" } >>
 
-- list_nonempty_sets_by_page(@gap, @n) do |r|
+- list_nonempty_bags_by_page(@gap, @n) do |r|
   %p
-    %a{ :href => "/set/#{r[:id]}" }
+    %a{ :href => "/bag/#{r[:bag_id]}" }
       =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'
 
-@@ set
+@@ bag
 %a{ :href => '/' } "Up"
 %br
-- list_files_of_set(@id) do |r|
-    %img{ :src => "http://127.0.0.1:4567#{r[:path]}" }
+- list_files_of_bag(@id) do |r|
+                %img{ :src => (link_file r[:repo_path]) }
 
 @@ all
 %p=count()
-%p=count_sets_nonempty()
-%p=count_sets_empty()
-- $db.fetch("select id, dir from set") do |r|
+%p=count_bags_nonempty()
+%p=count_bags_empty()
+- $db.fetch("select bag_id, dir from bag") do |r|
   %p
-    %a{ :href => "/set/#{r[:id]}" }
+    %a{ :href => "/bag/#{r[:bag_id]}" }
       =File.basename r[:dir]
 
 @@ empty
-- list_empty_sets do |r|
+- list_empty_bags do |r|
   %p
-    %a{ :href => "/set/#{r[:id]}" }
+    %a{ :href => "/bag/#{r[:bag_id]}" }
       =File.basename r[:dir]
 
 @@ style

@@ -17,7 +17,7 @@ let link a b =
 
 let cookie = Magic.make ~flags:[Magic.Mime] []
 
-let dir = concat (getenv "HOME") "files"
+let repo_dir = concat (getenv "HOME") "files"
 
 let ext_rel_of_mime = function
     "image/jpeg" -> "jpg", true
@@ -32,7 +32,7 @@ class file num origin (pos : int) =
   let md5 = Digest.to_hex (Digest.file origin) in
   let size = size_of origin in
   let mime = Magic.file cookie origin in
-  let dir' = concat dir mime in
+  let dir' = concat repo_dir mime in
   let dirn = concat dir' (sprintf "%Ld" num) in
   let ext, rel = ext_rel_of_mime mime in
   let name = sprintf "%s-%d.%s" md5 size ext in
