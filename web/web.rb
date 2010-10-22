@@ -89,5 +89,5 @@ __END__
 @@ set
 %a{ :href => '/' } "Up"
 %br
-- db.fetch("select path from file where image = true and id in (select file_id from set_file where set_id = #{@id} order by pos desc)") do |r|
+- db.fetch("select file.path from set, file, set_file where set.id = set_file.set_id and file.id = set_file.file_id and file.image = true and set.id = #{@id} order by set_file.pos") do |r|
     %img{ :src => "http://127.0.0.1:4567#{r[:path]}" }
