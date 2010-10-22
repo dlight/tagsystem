@@ -4,6 +4,7 @@ create table file
        (file_id         serial8 primary key,
         md5             varchar(32) not null,
         mime            text not null,
+        magic           text not null,
         file_size       int8 not null,
         repo_path       text not null unique,
 

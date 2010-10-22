@@ -15,7 +15,8 @@ let link a b =
 
 (*type ('a, 'b) either = Left of 'a | Right of 'b*)
 
-let cookie = Magic.make ~flags:[Magic.Mime] []
+let cookie_mime = Magic.make ~flags:[Magic.Mime] []
+let cookie_desc = Magic.make []
 
 let repo_dir = concat (getenv "HOME") "files"
 
@@ -31,7 +32,8 @@ let ext_rel_of_mime = function
 class file num origin (pos : int) =
   let md5 = Digest.to_hex (Digest.file origin) in
   let size = size_of origin in
-  let mime = Magic.file cookie origin in
+  let mime = Magic.file cookie_mime origin in
+  let magic = Magic.file cookie_desc origin in
   let dir' = concat repo_dir mime in
   let dirn = concat dir' (sprintf "%Ld" num) in
   let ext, rel = ext_rel_of_mime mime in
@@ -42,6 +44,7 @@ object(self)
   method md5 = md5
   method size = Int64.of_int size
   method mime = mime
+  method magic = magic
   method prev_dir = dirname origin
   method prev_name = basename origin
   method prev_path = origin
