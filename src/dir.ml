@@ -20,38 +20,56 @@ let cookie_desc = Magic.make []
 
 let repo_dir = concat (getenv "HOME") "files"
 
-let ext_rel_of_mime = function
-    "image/jpeg" -> "jpg", true
-  | "image/png" -> "png", true
-  | "image/gif" -> "gif", true
-  | "text/plain"-> "txt", false
-  | "text/html" -> "html", false
-  | _ -> "dat", false
+let ext_of_mime = function
+    "image/jpeg" -> "jpg"
+  | "image/png" -> "png"
+  | "image/gif" -> "gif"
+  | "text/plain"-> "txt"
+  | "text/html" -> "html"
+  | _ -> "dat"
 
+let name md5 size ext is_thumb info =
+  match is_thumb, info with
+    false, Some (h, w) ->
+      sprintf "%s-%Ld-%ldx%ld.%s" md5 size h w ext
+  | true, Some (h, w) ->
+      sprintf "%s-%Ld-thumbnail-%ldx%ld.%s" md5 size h w ext
+  | _ ->
+      sprintf "%s-%Ld.%s" md5 size ext
+      
 
 class file num origin (pos : int) =
   let md5 = Digest.to_hex (Digest.file origin) in
-  let size = size_of origin in
+  let size = Int64.of_int (size_of origin) in
   let mime = Magic.file cookie_mime origin in
   let magic = Magic.file cookie_desc origin in
   let dir' = concat repo_dir mime in
   let dirn = concat dir' (sprintf "%Ld" num) in
-  let ext, rel = ext_rel_of_mime mime in
-  let name = sprintf "%s-%d.%s" md5 size ext in
+  let ext = ext_of_mime mime in
+
+  let isimg, width, height, quality, info =
+    match Image.info origin with
+        None -> false, None, None, None, None
+      | Some (w, h, q) -> true, Some w, Some h, Some q, Some (w, h) in
+
+  let repo_name = name md5 size ext false info in
 object(self)
   method set_id = num
   method pos = Int64.of_int pos
   method md5 = md5
-  method size = Int64.of_int size
+  method size = size
   method mime = mime
   method magic = magic
   method prev_dir = dirname origin
   method prev_name = basename origin
   method prev_path = origin
   method dir = dirn
-  method name = name
-  method path = concat dirn name
-  method image = rel
+  method name = repo_name
+  method path = concat dirn repo_name
+  method image = isimg
+  method img_height = height
+  method img_width = width
+  method img_quality = quality
   method mkdir = mkdir dirn
   method link = link self#prev_path self#path
 end

@@ -3,7 +3,9 @@ BYTE_ENABLED = true
 
 USE_OCAMLFIND = true
 
-OCAMLFLAGS += -thread -syntax camlp4o
+# putting magick.cma here: ugly (and slow?)
+
+OCAMLFLAGS += -thread -syntax camlp4o -I +libMagick magick.cma
 OCAMLDEPFLAGS += -syntax camlp4o
 
 OCAMLPACKS[] =
@@ -15,11 +17,8 @@ OCAMLPACKS[] =
     fileutils
     extunix
 
-SOURCES_BATCH[] =
-    db
-    batch
-
 SOURCES_ADD[] =
+    image
     stat
     msort
     dir
