@@ -1,4 +1,10 @@
-drop table if exists bag_file, thumbnails, file, bag;
+drop table if exists bag_file, thumbnail, file, image, bag;
+
+create table image
+       (image_id        serial8 primary key,
+       width            int not null,
+       height           int not null,
+       quality          int not null);
 
 create table file
        (file_id         serial8 primary key,
@@ -8,11 +14,7 @@ create table file
         file_size       int8 not null,
         repo_path       text not null unique,
 
-        -- if image is true, those fields can't be null...
-        image           bool not null default false,
-        width           int,
-        height          int,
-        quality         int,
+        image_id        serial8 unique references image,
 
         -- access time isn't necessarily updated..
         file_insert_time     timestamp not null default current_timestamp,
@@ -25,14 +27,13 @@ create table file
 
         unique (md5, mime, file_size));
 
-create table thumbnails
+-- should be a file? (should have its own size, md5..)
+create table thumbnail
        (file_id         serial8 references file on delete cascade,
+        image_id        serial8 references image on delete cascade,
         max_width       int not null,
         max_height      int not null,
 
-        actual_width    int not null,
-        actual_height   int not null,
-        quality         int not null,
         scaled          bool,
         repo_path       text not null unique,
 
