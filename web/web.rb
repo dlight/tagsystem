@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'sequel'
 require 'sinatra'
+require 'haml'
 require 'sass'
 
 require_relative 'db'
@@ -22,11 +23,16 @@ get '/all' do
 end
 
 get '/page/:n' do |n|
+  @a = Time.new.to_f
+
   @gap = 100
   @half = 10
 
   @n = Integer(n)
+
   @N = count_sets_nonempty()
+
+  @x = Time.new.to_f
 
   @last = @N / @gap
   @win = 2*@half + 1
@@ -45,6 +51,7 @@ get '/page/:n' do |n|
   @hasless = true if @min > 0
   @hasmore = true if @max < @last
 
+  @b = Time.new.to_f
   haml :page
 end
 
@@ -86,6 +93,7 @@ __END__
   - for i in @min .. @n-1
     %a{ :href => "/page/#{i}" }=i
 
+  - c = Time.new.to_f
   =@n
 
   - for i in @n+1 .. @max
@@ -96,16 +104,21 @@ __END__
   - if @n < @last
     %a{ :href => "/page/#{@last}" } >>
 
+  - d = Time.new.to_f
 - list_nonempty_sets_by_page(@gap, @n) do |r|
   %p
     %a{ :href => "/set/#{r[:id]}" }
       =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'
 
+- e = Time.new.to_f
+- puts "X: #{@x - @a}\nB: #{@b - @a}\nC: #{c - @a}\nD: #{d - @a}\nE: #{e - @a}"
+
+
 @@ set
 %a{ :href => '/' } "Up"
 %br
 - list_files_of_set(@id) do |r|
-    %img{ :src => "http://127.0.0.1:4567#{r[:path]}" }
+    %img{ :src => "http://127.0.0.1:4567/ts#{r[:path]}" }
 
 @@ all
 %p=count()

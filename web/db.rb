@@ -33,7 +33,7 @@ helpers do
                  (select * from set_file join file on
                     (set_file.file_id = file.id)
                  where file.image
-                   and set_file.set_id = set.id) limit ? offset ? ",
+                   and set_file.set_id = set.id) limit ? offset ?",
               gap, n * gap) { |r| blk.call(r) }
   end
 
