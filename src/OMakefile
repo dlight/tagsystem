@@ -29,7 +29,7 @@ SOURCES_ADD[] =
 OCamlProgram($(BIN)/ts-add, $(SOURCES_ADD))
 
 $(BIN)/ts: ts-template.sh
-    sed "s:__ROOT__:$(shell realpath $(ROOT)):" ts-template.sh > $(BIN)/ts
+    m4 -D__ROOT__="$(shell realpath $(ROOT))" ts-template.sh > $(BIN)/ts
     chmod(755, $(BIN)/ts)
 
 .PHONY: bin: $(BIN)/ts $(BIN)/ts-add

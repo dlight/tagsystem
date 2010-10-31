@@ -1,6 +1,9 @@
 #!/bin/bash
 
-dir_autoset=__ROOT__ # substituido pelo omake
+# substituido pelo omake
+dir_autoset=__ROOT__
+# risos
+
 files_dir="$HOME/files"
 
 BIN="$dir_autoset/bin"
