@@ -4,6 +4,32 @@ open File
 open Printf
 open Sys
 
+
+
+module File =
+struct
+  type file = {
+    dir : string;
+    image : bool;
+    height : int32 option;
+    quality : int32 option;
+    width : int32 option;
+    magic : string;
+    md5 : string;
+    mime : string;
+    name : string;
+    path : string;
+    pos : int64;
+    prev_dir : string;
+    prev_name : string;
+    prev_path : string;
+    bag_id : int64;
+    size : int64;
+  }
+end
+
+open File
+
 (* I may remove this dependency *)
 let mkdir dir = FileUtil.mkdir ~parent:true dir
 
@@ -36,44 +62,47 @@ let name md5 size ext is_thumb info =
       sprintf "%s-%Ld-thumbnail-%ldx%ld.%s" md5 size h w ext
   | _ ->
       sprintf "%s-%Ld.%s" md5 size ext
-      
 
-class file num origin (pos : int) =
+let new_file bag_id origin pos =
   let md5 = Digest.to_hex (Digest.file origin) in
   let size = Int64.of_int (size_of origin) in
   let mime = Magic.file cookie_mime origin in
   let magic = Magic.file cookie_desc origin in
   let dir' = concat repo_dir mime in
-  let dirn = concat dir' (sprintf "%Ld" num) in
+  let dirn = concat dir' (sprintf "%Ld" bag_id) in
   let ext = ext_of_mime mime in
 
-  let isimg, width, height, quality, info =
+  let image, width, height, quality, info =
     match Image.info origin with
         None -> false, None, None, None, None
       | Some (w, h, q) -> true, Some w, Some h, Some q, Some (w, h) in
 
   let repo_name = name md5 size ext false info in
-object(self)
-  method set_id = num
-  method pos = Int64.of_int pos
-  method md5 = md5
-  method size = size
-  method mime = mime
-  method magic = magic
-  method prev_dir = dirname origin
-  method prev_name = basename origin
-  method prev_path = origin
-  method dir = dirn
-  method name = repo_name
-  method path = concat dirn repo_name
-  method image = isimg
-  method img_height = height
-  method img_width = width
-  method img_quality = quality
-  method mkdir = mkdir dirn
-  method link = link self#prev_path self#path
-end
- 
+
+    {
+      bag_id;
+      pos = Int64.of_int pos;
+      md5;
+      size;
+      mime;
+      magic;
+      prev_name = basename origin;
+      prev_dir = dirname origin;
+      prev_path = origin;
+      dir = dirn;
+      name = repo_name;
+      path = concat dirn repo_name;
+      image;
+      height;
+      width;
+      quality
+    }
+
+let mkdir_f file =
+  mkdir file.dir
+
+let link_f file =
+  link file.prev_path file.path 
 
 (*let info file =
   try Left (new file file) with
@@ -99,12 +128,12 @@ let files dir =
     Msort.sort a;
     a
 
-let compose n dir acc i f =
+let compose bag_id dir acc i f =
   let f' = concat dir f in
-    (new file n f' i)::acc
+    (new_file bag_id f' i)::acc
 
-let of_dir n files dir =
-  Array.fold_lefti (compose n dir) [] files
+let of_dir bag_id files dir =
+  Array.fold_lefti (compose bag_id dir) [] files
 
-let mkdir_l l = List.iter (fun x -> x#mkdir) l
+let mkdir_l l = List.iter (fun x -> mkdir_f x) l
 
