@@ -30,7 +30,7 @@ get '/page/:n' do |n|
 
   @n = Integer(n)
 
-  @N = count_sets_nonempty()
+  @N = 4623 # count_sets_nonempty()
 
   @x = Time.new.to_f
 
