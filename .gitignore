@@ -15,3 +15,4 @@ texput.log
 *.pid
 web/log/*
 web/tmp/*
+*.orig
