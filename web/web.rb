@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'sequel'
 require 'sinatra'
+require 'haml'
 require 'sass'
 
 require_relative 'db'
@@ -35,11 +36,15 @@ get '/all' do
 end
 
 get '/page/:n' do |n|
+  @a = Time.new.to_f
+
   @gap = 100
   @half = 10
 
   @n = Integer(n)
   @N = count_bags_nonempty()
+
+  @x = Time.new.to_f
 
   @last = @N / @gap
   @win = 2*@half + 1
@@ -58,6 +63,7 @@ get '/page/:n' do |n|
   @hasless = true if @min > 0
   @hasmore = true if @max < @last
 
+  @b = Time.new.to_f
   haml :page
 end
 
@@ -99,6 +105,7 @@ __END__
   - for i in @min .. @n-1
     %a{ :href => "/page/#{i}" }=i
 
+  - c = Time.new.to_f
   =@n
 
   - for i in @n+1 .. @max
@@ -110,9 +117,13 @@ __END__
     %a{ :href => "/page/#{@last}" } >>
 
 - list_nonempty_bags_by_page(@gap, @n) do |r|
+  - d = Time.new.to_f
   %p
     %a{ :href => "/bag/#{r[:bag_id]}" }
       =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'
+
+- e = Time.new.to_f
+- puts "X: #{@x - @a}\nB: #{@b - @a}\nC: #{c - @a}\nD: #{d - @a}\nE: #{e - @a}"
 
 @@ bag
 %a{ :href => '/' } "Up"
