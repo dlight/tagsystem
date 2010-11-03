@@ -117,13 +117,12 @@ __END__
     %a{ :href => "/page/#{@last}" } >>
 
 - list_nonempty_bags_by_page(@gap, @n) do |r|
-  - d = Time.new.to_f
   %p
     %a{ :href => "/bag/#{r[:bag_id]}" }
       =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'
 
-- e = Time.new.to_f
-- puts "X: #{@x - @a}\nB: #{@b - @a}\nC: #{c - @a}\nD: #{d - @a}\nE: #{e - @a}"
+- d = Time.new.to_f
+- puts "X: #{@x - @a}\nB: #{@b - @a}\nC: #{c - @a}\nD: #{d - @a}"
 
 @@ bag
 %a{ :href => '/' } "Up"
