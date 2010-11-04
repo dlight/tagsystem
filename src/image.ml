@@ -29,8 +29,9 @@ let resize' maxw maxh img f =
   let img' = Fun.resize ~width:w ~height:h ~filter:Lanczos ~blur:1.0 () img in
     Imper.set_compression_quality img' 85;
     let w', h' = Int32.of_int w, Int32.of_int h in
-    write_image img' (f w' h');
-    (w', h')
+    let n = f w' h' in
+    write_image img' n;
+    (n, w', h')
 
 (* Example: r 300 300 "/q/a/01.jpg" (sprintf "/q/ahm-%ldx%ld.jpg") *)
 

@@ -64,12 +64,27 @@ let insert_file db file  =
      returning file_id" in
     read_id l
 
+let insert_thumb db file_id n w h max_w max_h =
+  let image_id = insert_image db (w, h, 0l) in
+  PGSQL(db) "insert into thumbnail
+              (file_id, image_id, max_width, max_height, scaled, repo_path)
+             values
+              ($file_id, $image_id, $max_w, $max_h, true, $n)"
+
+let insert_thumbs db file_id thumbs =
+  let f = function
+      None -> ()
+    | Some (n, w, h, max_w, max_h) ->
+        insert_thumb db file_id n w h max_w max_h in
+  List.iter f thumbs
+
 let fid_if_exists db file = function
     Some a -> a
   | None -> insert_file db file
 
-let insert_file_rel db file_id' file =
+let insert_file_rel db file_id' thumbs file =
     let file_id = fid_if_exists db file file_id' in
+      insert_thumbs db file_id thumbs;
       insert_bag_file db file_id file
 
 let connect () = PGOCaml.connect ()

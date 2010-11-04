@@ -22,6 +22,7 @@ struct
     prev_path : string;
     bag_id : int64;
     size : int64;
+    ext: string
   }
 end
 
@@ -60,6 +61,19 @@ let name md5 size ext is_thumb info =
   | _ ->
       sprintf "%s-%Ld.%s" md5 size ext
 
+let write_thumbnail { md5; size; ext; prev_path; dir } max_w max_h =
+  let f w h = concat dir (name md5 size ext true (Some(w, h, true))) in
+  match Image.r max_w max_h prev_path f with
+      None -> None
+    | Some (n, w', h') -> Some (n, w', h',
+                                Int32.of_int max_w,
+                                Int32.of_int max_h)
+
+let thumbnails = [(840, 630); (600, 450)]
+
+let write_thumbnails file =
+  List.map (fun (w, h) -> write_thumbnail file w h) thumbnails
+
 let new_file bag_id origin pos =
   let md5 = Digest.to_hex (Digest.file origin) in
   let size = Int64.of_int (size_of origin) in
@@ -78,6 +92,7 @@ let new_file bag_id origin pos =
       pos = Int64.of_int pos;
       md5;
       size;
+      ext;
       mime;
       magic;
       prev_name = basename origin;

@@ -12,14 +12,22 @@ helpers do
       blk.call(r)
     end
   end
-  def list_files_of_bag(id, &blk)
+  def list_files_of_bag_(id, &blk)
     $db.fetch("select file.repo_path from file natural join bag_file
                 where file.image_id is not null
-                  and bag_file.bag_id = 1
+                  and bag_file.bag_id = ?
                 order by bag_file.pos", id) { |r| blk.call(r) }
   end
 
-
+  def list_files_of_bag(id, &blk)
+    $db.fetch("select thumbnail.repo_path from thumbnail, (file
+                           natural join bag_file)
+                where thumbnail.file_id = file.file_id
+                  and bag_file.bag_id = ?
+                  and thumbnail.max_width = 840
+                  and thumbnail.max_height = 630
+                order by bag_file.pos", id) { |r| blk.call(r) }
+  end
 
   # ugly
   def list_empty_bags(&blk)

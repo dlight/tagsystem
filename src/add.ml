@@ -14,7 +14,8 @@ let link_file db file =
 
 let add_file db file =
   let file_id' = link_file db file in
-  insert_file_rel db file_id' file
+  let thumbs = write_thumbnails file in
+  insert_file_rel db file_id' thumbs file
 
 let add db dir fs =
   let bag_id = insert_bag db dir in
