@@ -10,10 +10,7 @@ module File =
 struct
   type file = {
     dir : string;
-    image : bool;
-    height : int32 option;
-    quality : int32 option;
-    width : int32 option;
+    image : (int32 * int32 * int32) option;
     magic : string;
     md5 : string;
     mime : string;
@@ -56,9 +53,9 @@ let ext_of_mime = function
 
 let name md5 size ext is_thumb info =
   match is_thumb, info with
-    false, Some (h, w) ->
+    false, Some (h, w, _) ->
       sprintf "%s-%Ld-%ldx%ld.%s" md5 size h w ext
-  | true, Some (h, w) ->
+  | true, Some (h, w, _) ->
       sprintf "%s-%Ld-thumbnail-%ldx%ld.%s" md5 size h w ext
   | _ ->
       sprintf "%s-%Ld.%s" md5 size ext
@@ -72,12 +69,9 @@ let new_file bag_id origin pos =
   let dirn = concat dir' (sprintf "%Ld" bag_id) in
   let ext = ext_of_mime mime in
 
-  let image, width, height, quality, info =
-    match Image.info origin with
-        None -> false, None, None, None, None
-      | Some (w, h, q) -> true, Some w, Some h, Some q, Some (w, h) in
+  let image = Image.info origin in
 
-  let repo_name = name md5 size ext false info in
+  let repo_name = name md5 size ext false image in
 
     {
       bag_id;
@@ -92,10 +86,7 @@ let new_file bag_id origin pos =
       dir = dirn;
       name = repo_name;
       path = concat dirn repo_name;
-      image;
-      height;
-      width;
-      quality
+      image
     }
 
 let mkdir_f file =

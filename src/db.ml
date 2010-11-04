@@ -36,18 +36,32 @@ let insert_bag_file db file_id file =
 let close_bag db bag_id =
   PGSQL(db) "update bag set is_open = false where bag_id = $bag_id"
 
+let insert_image db (width, height, quality) =
+  let l = PGSQL(db) "insert into image (width, height, quality) values
+            ($width, $height, $quality) returning image_id" in
+  read_id l
+
+let insert_maybe_image db = function
+    Some data -> Some (insert_image db data)
+  | None -> None
+
 let insert_file db file  =
-  let { md5; mime; magic; size; path; image; width; height; quality } = file in
+  let { md5; mime; magic;
+        size; path; image } = file in
+
+  let image_id = insert_maybe_image db image in
+
   let _, now, a, m, c = Stat.min_now_file path in
 
-  let l = PGSQL(db) "insert into file (md5, mime, magic, file_size, repo_path, image,
-    width, height, quality,
-    file_insert_time, file_access_time, file_update_time,
-    file_atime, file_ctime, file_mtime)
-                    values ($md5, $mime, $magic, $size, $path, $image,
-    $?width, $?height, $?quality,
-    $now, $now, $now, $a, $c, $m)
-                    returning file_id" in
+  let l = PGSQL(db)
+    "insert into file
+       (md5, mime, magic, file_size, repo_path, image_id,
+        file_insert_time, file_access_time, file_update_time,
+        file_atime, file_ctime, file_mtime)
+     values
+       ($md5, $mime, $magic, $size, $path, $?image_id, $now,
+        $now, $now, $a, $c, $m)
+     returning file_id" in
     read_id l
 
 let fid_if_exists db file = function

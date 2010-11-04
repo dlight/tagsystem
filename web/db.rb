@@ -14,7 +14,7 @@ helpers do
   end
   def list_files_of_bag(id, &blk)
     $db.fetch("select file.repo_path from file natural join bag_file
-                where file.image
+                where file.image_id is not null
                   and bag_file.bag_id = 1
                 order by bag_file.pos", id) { |r| blk.call(r) }
   end
@@ -33,7 +33,7 @@ helpers do
   def list_nonempty_bags_by_page(gap, n, &blk)
     $db.fetch("select bag_id, dir from bag where exists
                  (select * from bag_file natural join file
-                 where file.image
+                 where file.image_id is not null
                    and bag_file.bag_id = bag.bag_id) limit ? offset ? ",
               gap, n * gap) { |r| blk.call(r) }
   end
@@ -41,13 +41,13 @@ helpers do
   def count_bags_nonempty()
     $db.fetch("select count(*) from bag where exists
                  (select * from bag_file natural join file
-                 where file.image
+                 where file.image_id is not null
                    and bag_file.bag_id = bag.bag_id)").first[:count];
   end
   def count_bags_empty()
     $db.fetch("select count(*) from bag where not exists
                  (select * from bag_file natural join file
-                 where file.image
+                 where file.image_id is not null
                    and bag_file.bag_id = bag.bag_id)").first[:count];
   end
 end

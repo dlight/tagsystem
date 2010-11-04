@@ -1,4 +1,4 @@
-drop table if exists bag_file, thumbnail, file, image, bag;
+drop table if exists bag_file, file, thumbnail, image, bag cascade;
 
 create table image
        (image_id        serial8 primary key,
@@ -14,7 +14,7 @@ create table file
         file_size       int8 not null,
         repo_path       text not null unique,
 
-        image_id        serial8 unique references image,
+        image_id        int8 references image,
 
         -- access time isn't necessarily updated..
         file_insert_time     timestamp not null default current_timestamp,
@@ -28,9 +28,13 @@ create table file
         unique (md5, mime, file_size));
 
 -- should be a file? (should have its own size, md5..)
+
+-- it will be a file when one can save a image from imagemagick
+-- to a string
 create table thumbnail
-       (file_id         serial8 references file on delete cascade,
-        image_id        serial8 references image on delete cascade,
+        -- file_id references the id of its *parent*
+       (file_id         int8 not null references file on delete cascade,
+        image_id        int8 not null references image on delete cascade,
         max_width       int not null,
         max_height      int not null,
 
@@ -69,7 +73,7 @@ create table bag
         dir_mtime       timestamp);
 
 create table bag_file
-       (bag_id    int8 references bag on delete cascade,
+       (bag_id    int8 not null references bag on delete cascade,
         file_id   int8 not null references file on delete cascade,
 
         pos       int8 not null,
