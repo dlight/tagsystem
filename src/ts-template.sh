@@ -14,10 +14,11 @@ c="$1"
 shift
 
 case "$c" in
+    clean) $0 rm; $0 createdb;;
     add) "$BIN"/ts-add "$@";;
     rm) rm -rf "$files_dir"/?*;;
     createdb) "$TOOLS"/createdb-simpler;;
     interface) "$TOOLS"/interface "$@";;
-    web) "$WEB"/ts-web;;
+    web) "$TOOLS"/web;;
     *) cat "$0";;
 esac
