@@ -34,8 +34,12 @@ helpers do
     $db.fetch("select bag.bag_id, bag.dir from file natural join
                                                bag_file natural join bag
                 group by bag.bag_id, bag.dir
-                having count(case when
-                              file.image then 1 end) = 0") { |r| blk.call(r) }
+                having count(
+                  case when file.image_id is not null then
+                    1
+                  end) = 0") {
+      |r| blk.call(r)
+    }
   end
 
   def list_nonempty_bags_by_page(gap, n, &blk)
