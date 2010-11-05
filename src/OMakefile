@@ -28,13 +28,14 @@ SOURCES_ADD[] =
 #OCamlProgram($(BIN)/ts-batch, $(SOURCES_BATCH))
 OCamlProgram($(BIN)/ts-add, $(SOURCES_ADD))
 
-$(BIN)/ts: ts-template.sh
+$(BIN):
+	mkdir $(BIN)
+
+$(BIN)/ts: ts-template.sh $(BIN)
     m4 -D__ROOT__="$(shell realpath $(ROOT))" ts-template.sh > $(BIN)/ts
     chmod(755, $(BIN)/ts)
 
-.PHONY: bin: $(BIN)/ts $(BIN)/ts-add
-
-.DEFAULT: bin
+.DEFAULT: $(BIN) $(BIN)/ts $(BIN)/ts-add
 
 .PHONY: clean:
 	rm -f *.cm?

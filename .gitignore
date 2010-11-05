@@ -11,7 +11,6 @@ web/log
 web/tmp
 web/public
 
-texput.log
 *.omc
 .omakedb
 .omakedb.lock
