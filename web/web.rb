@@ -62,6 +62,10 @@ get '/page/:n' do |n|
     @max = @n + @half
   end
 
+  if @max > @last
+    @max = @last
+  end
+
   @hasless = true if @min > 0
   @hasmore = true if @max < @last
 
@@ -96,56 +100,75 @@ __END__
 
 @@ page
 #menu
-  %a{ :href => "/all" } All
-  %a{ :href => "/empty" } Empty
-  |
+  %ul
+    %li
+      %a{ :href => "/all" } A
+    %li
+      %a{ :href => "/empty" } E
 
-  -if @n > 0
-    %a{ :href => "/page/0" } <<
-  - if @hasless
-    %a{ :href => "/page/#{@n - @win}" } <
+    -if @n > 0
+      %li
+        %a{ :href => "/page/0" } <<
+    - if @hasless
+      %li
+        %a{ :href => "/page/#{@n - @win}" } <
 
-  - for i in @min .. @n-1
-    %a{ :href => "/page/#{i}" }=i
+    - for i in @min .. @n-1
+      %li
+        %a{ :href => "/page/#{i}" }=i
 
-  - c = Time.new.to_f
-  =@n
+    %li
+      =@n
 
-  - for i in @n+1 .. @max
-    %a{ :href => "/page/#{i}" }=i
+    - for i in @n+1 .. @max
+      %li
+        %a{ :href => "/page/#{i}" }=i
 
-  - if @hasmore
-    %a{ :href => "/page/#{@n + @win}" } >
-  - if @n < @last
-    %a{ :href => "/page/#{@last}" } >>
+    - if @hasmore
+      %li
+        %a{ :href => "/page/#{@n + @win}" } >
+    - if @n < @last
+      %li
+        %a{ :href => "/page/#{@last}" } >>
+
+  %br{ :clear => 'left' }
 
 - list_nonempty_bags_by_page(@gap, @n) do |r|
   %p
     %a{ :href => "/bag/#{$dim}/#{r[:bag_id]}" }
       =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'
 
-- d = Time.new.to_f
-- puts "X: #{@x - @a}\nB: #{@b - @a}\nC: #{c - @a}\nD: #{d - @a}"
+- c = Time.new.to_f
+- puts "X: #{@x - @a}\nB: #{@b - @a}\nC: #{c - @a}"
 
 @@ bag
-%a{ :href => '/' } "Up"
-%a{ :href => "/bag/hi-res/#{@id}" } "hi-res"
-%a{ :href => "/bag/840x630/#{@id}" } "840x630"
-%a{ :href => "/bag/600x450/#{@id}" } "600x450"
-%br
+#menu
+  %ul
+    %li
+      %a{ :href => '/' } ^
+    %li
+      %a{ :href => "/bag/hi-res/#{@id}" } hi
+    %li
+      %a{ :href => "/bag/840x630/#{@id}" } def
+    %li
+      %a{ :href => "/bag/600x450/#{@id}" } low
+  %br{ :clear => 'left' }
+
 - list_files_with_type(@t, @id) do |r|
-                %img{ :src => (link_file r[:repo_path]) }
+  %img{ :src => (link_file r[:repo_path]) }
 
 @@ all
-%p=count()
-%p=count_bags_nonempty()
-%p=count_bags_empty()
+%a{ :href => '/' } Up
+%p="Total: #{count()}"
+%p="Nao vazio: #{count_bags_nonempty()}"
+%p="Vazio: #{count_bags_empty()}"
 - $db.fetch("select bag_id, dir from bag") do |r|
   %p
     %a{ :href => "/bag/#{$dim}/#{r[:bag_id]}" }
       =File.basename r[:dir]
 
 @@ empty
+%a{ :href => '/' } Up
 - list_empty_bags do |r|
   %p
     %a{ :href => "/bag/#{$dim}/#{r[:bag_id]}" }
@@ -153,5 +176,33 @@ __END__
 
 @@ style
 #menu
-  font-family: Andale Mono, monospace
-  font-size: 130%
+  width: 100%
+  margin: 1em 0
+  padding: 0px 0.5em
+  background: #eee none
+
+  padding: 0
+  background: #fff none
+  font-family: DejaVu Sans
+  font-size: 105%
+  ul
+    margin: 0
+    padding: 0
+    list-style-type: none
+
+  li
+
+    margin: 0
+    padding: 0
+    float: left
+
+    width: 2.3em
+    margin-right: 0.1em
+    background: #eee none
+    text-align: center
+  a
+    display: block
+    width: 100%
+    text-decoration: none
+  a:hover
+    background: #ff9 none
