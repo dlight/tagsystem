@@ -25,6 +25,8 @@ configure :production do
   $pre_dir = "prod"
 end
 
+$dim = "840x630"
+
 $db = Sequel.connect('postgres://localhost')
 
 get '/' do
@@ -71,7 +73,8 @@ get '/empty' do
   haml :empty
 end
 
-get '/bag/:id' do |id|
+get '/bag/:t/:id' do |t, id|
+  @t = t
   @id = id
   haml :bag
 end
@@ -118,7 +121,7 @@ __END__
 
 - list_nonempty_bags_by_page(@gap, @n) do |r|
   %p
-    %a{ :href => "/bag/#{r[:bag_id]}" }
+    %a{ :href => "/bag/#{$dim}/#{r[:bag_id]}" }
       =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'
 
 - d = Time.new.to_f
@@ -126,8 +129,11 @@ __END__
 
 @@ bag
 %a{ :href => '/' } "Up"
+%a{ :href => "/bag/hi-res/#{@id}" } "hi-res"
+%a{ :href => "/bag/840x630/#{@id}" } "840x630"
+%a{ :href => "/bag/600x450/#{@id}" } "600x450"
 %br
-- list_files_of_bag(@id) do |r|
+- list_files_with_type(@t, @id) do |r|
                 %img{ :src => (link_file r[:repo_path]) }
 
 @@ all
@@ -136,13 +142,13 @@ __END__
 %p=count_bags_empty()
 - $db.fetch("select bag_id, dir from bag") do |r|
   %p
-    %a{ :href => "/bag/#{r[:bag_id]}" }
+    %a{ :href => "/bag/#{$dim}/#{r[:bag_id]}" }
       =File.basename r[:dir]
 
 @@ empty
 - list_empty_bags do |r|
   %p
-    %a{ :href => "/bag/#{r[:bag_id]}" }
+    %a{ :href => "/bag/#{$dim}/#{r[:bag_id]}" }
       =File.basename r[:dir]
 
 @@ style
