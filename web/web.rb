@@ -106,12 +106,16 @@ __END__
     %li<
       %a{ :href => "/empty" } E
 
+  %ul
+
     -if @n > 0
       %li<
         %a{ :href => "/page/0" } <<
     - if @hasless
       %li<
         %a{ :href => "/page/#{@n - @win}" } <
+
+  %ul
 
     - for i in @min .. @n-1
       %li<
@@ -123,6 +127,8 @@ __END__
     - for i in @n+1 .. @max
       %li<
         %a{ :href => "/page/#{i}" }=i
+
+  %ul
 
     - if @hasmore
       %li<
@@ -148,6 +154,7 @@ __END__
   %ul
     %li
       %a{ :href => '/' } ^
+  %ul
     %li
       %a{ :href => "/bag/hi-res/#{@id}" } hi
     %li
@@ -190,9 +197,11 @@ body
 
   font-size: 105%
   ul
+    float: left
     margin: 0
     padding: 0
     list-style-type: none
+    margin-right: 0.3em
 
   li
 
@@ -204,6 +213,7 @@ body
     margin-right: 0.1em
     background: #eee none
     text-align: center
+
   a
     display: block
     width: 100%
