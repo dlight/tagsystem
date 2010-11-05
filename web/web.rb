@@ -25,7 +25,7 @@ configure :production do
   $pre_dir = "prod"
 end
 
-$dim = "840x630"
+$dim = "600x450"
 
 $db = Sequel.connect('postgres://localhost')
 
@@ -149,7 +149,7 @@ __END__
     %li
       %a{ :href => "/bag/hi-res/#{@id}" } hi
     %li
-      %a{ :href => "/bag/840x630/#{@id}" } def
+      %a{ :href => "/bag/840x630/#{@id}" } mid
     %li
       %a{ :href => "/bag/600x450/#{@id}" } low
   %br{ :clear => 'left' }
