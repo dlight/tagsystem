@@ -18,10 +18,6 @@ WEB
 * creating a cursor + notify, for better performance
   - also keeping a counter for "number of bags", with a trigger
 
-* better page layout (first: fixed-width horizontal menu, for using a
-                      proportional font)
-  see: notes/horizontal-menu
-
 FSCK
 ----
 

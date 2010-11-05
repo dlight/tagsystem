@@ -101,42 +101,44 @@ __END__
 @@ page
 #menu
   %ul
-    %li
+    %li<
       %a{ :href => "/all" } A
-    %li
+    %li<
       %a{ :href => "/empty" } E
 
     -if @n > 0
-      %li
+      %li<
         %a{ :href => "/page/0" } <<
     - if @hasless
-      %li
+      %li<
         %a{ :href => "/page/#{@n - @win}" } <
 
     - for i in @min .. @n-1
-      %li
+      %li<
         %a{ :href => "/page/#{i}" }=i
 
-    %li
+    %li<
       =@n
 
     - for i in @n+1 .. @max
-      %li
+      %li<
         %a{ :href => "/page/#{i}" }=i
 
     - if @hasmore
-      %li
+      %li<
         %a{ :href => "/page/#{@n + @win}" } >
     - if @n < @last
-      %li
+      %li<
         %a{ :href => "/page/#{@last}" } >>
 
   %br{ :clear => 'left' }
 
-- list_nonempty_bags_by_page(@gap, @n) do |r|
-  %p
-    %a{ :href => "/bag/#{$dim}/#{r[:bag_id]}" }
-      =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'
+#bags
+  %ul
+  - list_nonempty_bags_by_page(@gap, @n) do |r|
+    %li<
+      %a{ :href => "/bag/#{$dim}/#{r[:bag_id]}" }<
+        =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'
 
 - c = Time.new.to_f
 - puts "X: #{@x - @a}\nB: #{@b - @a}\nC: #{c - @a}"
@@ -175,6 +177,8 @@ __END__
       =File.basename r[:dir]
 
 @@ style
+body
+  font-family: DejaVu Sans
 #menu
   width: 100%
   margin: 1em 0
@@ -183,7 +187,7 @@ __END__
 
   padding: 0
   background: #fff none
-  font-family: DejaVu Sans
+
   font-size: 105%
   ul
     margin: 0
@@ -206,3 +210,14 @@ __END__
     text-decoration: none
   a:hover
     background: #ff9 none
+
+#bags
+  font-size: 105%
+  line-height: 1.2em
+  ul
+    list-style-type: none
+  a
+    color: #819F00
+    text-decoration: none
+  a:hover
+    color: #710067
