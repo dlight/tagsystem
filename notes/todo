@@ -1,0 +1,52 @@
+DO NOW
+------
+
+* turn thumbnails into files (marked as generated = true)
+  (that is: add them in the file tables, so that they can have their
+   own md5, etc)
+  - for do that, it's better to save a image to a string (this requires
+    changes to ocaml-imagemagick). *but*, it is possible to change at an
+    temporary file, then mv
+
+* keeping the relevant thumbnail sizes in a table (instead of statically
+  in ts add), and make ts add query this
+
+WEB
+---
+
+* creating a view for complex queries
+* creating a cursor + notify, for better performance
+  - also keeping a counter for "number of bags", with a trigger
+
+* better page layout (first: fixed-width horizontal menu, for using a
+                      proportional font)
+  see: notes/horizontal-menu
+
+FSCK
+----
+
+* ts fsck, with options; by default would check if database is 'dirty'
+  (has open bags)
+  - in the future, would check if the fetch log is clean; ifnot, replay
+    them
+  - extreme fsck: check md5sum of everything
+
+* a tool for generating missing thumbnails, and dropping irrelevant ones;
+  maybe integrated with ts fsck?
+
+  or better: this tool would be like:
+    ts thumbnail --add 800x600
+    ts thumbnail --rem 800x600
+    ts thumbnail --check
+
+    it would:
+      * modify the list of thumbnails, commit
+               [ so that new adds would add correct thumbnails ]
+      * begin transaction, search for all thumbnails and/or non-generated
+        images, do stuff
+
+MORE
+----
+
+* ts static for creating static pages. needs some static navigation and
+  index. also an option for creating such pages *without* checking the db
