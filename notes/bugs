@@ -1,0 +1,5 @@
+1) when adding a thumbnail that already exists, it should ignore; but now, it
+   just exits, the operation left midway
+
+ERROR: 23505: duplicate key value violates unique constraint "thumbnail_repo_path_key"
+Fatal error: exception PGOCaml_generic.Make(Thread).PostgreSQL_Error("ERROR: 23505: duplicate key value violates unique constraint "thumbnail_repo_path_key"", _)
