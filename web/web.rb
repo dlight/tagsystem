@@ -102,6 +102,9 @@ __END__
 %html
   %head
     %link{:href=>'/style.css', :rel => 'stylesheet', :type => "text/css"}
+    %script{ :src => '/jquery-1.4.2.js' }
+    %script{ :src => '/jquery.hotkeys.js' }
+    %script{ :src => '/nav.js' }
   %body
     = yield
 
@@ -109,7 +112,7 @@ __END__
 #menu
   %ul
     %li<
-      %a{ :href => "/" } /
+      %a#up{ :href => "/" } /
     %li<
       %a{ :href => "/all" } A
     %li<
@@ -120,7 +123,7 @@ __END__
         %a{ :href => "/page/0" } <<
     - if @hasless
       %li<
-        %a{ :href => "/page/#{@n - @win}" } <
+        %a#prev{ :href => "/page/#{@n - @win}" } <
   %ul
     - for i in @min .. @n-1
       %li<
@@ -134,7 +137,7 @@ __END__
   %ul
     - if @hasmore
       %li<
-        %a{ :href => "/page/#{@n + @win}" } >
+        %a#next{ :href => "/page/#{@n + @win}" } >
     - if @n < @last
       %li<
         %a{ :href => "/page/#{@last}" } >>
@@ -158,21 +161,21 @@ __END__
 #menu
   %ul
     %li
-      %a{ :href => '/' } ^
+      %a#up{ :href => '/' } ^
   %ul
     %li
-      %a{ :href => "/bag/#{@t}/#{Integer(@id)-1}" } <
+      %a#prev{ :href => "/bag/#{@t}/#{Integer(@id)-1}" } <
 
   %ul
     %li
-      %a{ :href => "/bag/hi-res/#{@id}" } hi
+      %a#hi{ :href => "/bag/hi-res/#{@id}" } hi
     %li
-      %a{ :href => "/bag/840x630/#{@id}" } mid
+      %a#mid{ :href => "/bag/840x630/#{@id}" } mid
     %li
-      %a{ :href => "/bag/600x450/#{@id}" } low
+      %a#low{ :href => "/bag/600x450/#{@id}" } low
   %ul
     %li
-      %a{ :href => "/bag/#{@t}/#{Integer(@id)+1}" } >
+      %a#next{ :href => "/bag/#{@t}/#{Integer(@id)+1}" } >
   %br{ :clear => 'left' }
 
 @@ bag
