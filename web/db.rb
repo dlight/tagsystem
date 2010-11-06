@@ -65,7 +65,8 @@ helpers do
   def list_nonempty_bags_by_page(gap, n, &blk)
     $db.fetch("select bag_id, dir from bag where exists
                  (select * from file natural join image natural join bag_file
-                 where bag_file.bag_id = bag.bag_id) limit ? offset ? ",
+                 where bag_file.bag_id = bag.bag_id) order by sorting_time desc
+               limit ? offset ? ",
               gap, n * gap) { |r| blk.call(r) }
   end
 
