@@ -16,4 +16,4 @@ let comp a b =
           if c = 0 then compare a b else c
 
 let sort q =
-  Array.sort comp q (* ~cmp:(fun x y -> comp x#prev_name y#prev_name) q*)
+  Array.sort compare q
