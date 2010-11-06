@@ -26,6 +26,7 @@ configure :production do
 end
 
 $dim = "600x450"
+$profile = false
 
 $db = Sequel.connect('postgres://localhost')
 
@@ -87,6 +88,12 @@ get '/style.css' do
   sass :style
 end
 
+helpers do
+  def menu(&b)
+    haml :menu, {}, { :arg => b }
+  end
+end
+
 enable :inline_templates
 
 __END__
@@ -98,38 +105,33 @@ __END__
   %body
     = yield
 
-@@ page
+@@ page_menu
 #menu
   %ul
+    %li<
+      %a{ :href => "/" } /
     %li<
       %a{ :href => "/all" } A
     %li<
       %a{ :href => "/empty" } E
-
   %ul
-
     -if @n > 0
       %li<
         %a{ :href => "/page/0" } <<
     - if @hasless
       %li<
         %a{ :href => "/page/#{@n - @win}" } <
-
   %ul
-
     - for i in @min .. @n-1
       %li<
         %a{ :href => "/page/#{i}" }=i
-
     %li<
       =@n
 
     - for i in @n+1 .. @max
       %li<
         %a{ :href => "/page/#{i}" }=i
-
   %ul
-
     - if @hasmore
       %li<
         %a{ :href => "/page/#{@n + @win}" } >
@@ -139,6 +141,9 @@ __END__
 
   %br{ :clear => 'left' }
 
+@@ page
+= haml :page_menu
+
 #bags
   %ul
   - list_nonempty_bags_by_page(@gap, @n) do |r|
@@ -147,13 +152,17 @@ __END__
         =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'
 
 - c = Time.new.to_f
-- puts "X: #{@x - @a}\nB: #{@b - @a}\nC: #{c - @a}"
+- puts "X: #{@x - @a}\nB: #{@b - @a}\nC: #{c - @a}" if $profile
 
-@@ bag
+@@ bag_menu
 #menu
   %ul
     %li
       %a{ :href => '/' } ^
+  %ul
+    %li
+      %a{ :href => "/bag/#{@t}/#{Integer(@id)-1}" } <
+
   %ul
     %li
       %a{ :href => "/bag/hi-res/#{@id}" } hi
@@ -161,8 +170,13 @@ __END__
       %a{ :href => "/bag/840x630/#{@id}" } mid
     %li
       %a{ :href => "/bag/600x450/#{@id}" } low
+  %ul
+    %li
+      %a{ :href => "/bag/#{@t}/#{Integer(@id)+1}" } >
   %br{ :clear => 'left' }
 
+@@ bag
+= haml :bag_menu
 - list_files_with_type(@t, @id) do |r|
   %img{ :src => (link_file r[:repo_path]) }
 
@@ -201,7 +215,7 @@ body
     margin: 0
     padding: 0
     list-style-type: none
-    margin-right: 0.3em
+    margin-right: 0.15em
 
   li
 
