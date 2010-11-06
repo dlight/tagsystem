@@ -109,6 +109,8 @@ __END__
     = yield
 
 @@ page_menu
+%a#prev{ :href => "/page/#{Integer(@n)-1}" }
+%a#next{ :href => "/page/#{Integer(@n)+1}" }
 #menu
   %ul
     %li<
@@ -123,7 +125,7 @@ __END__
         %a{ :href => "/page/0" } <<
     - if @hasless
       %li<
-        %a#prev{ :href => "/page/#{@n - @win}" } <
+        %a{ :href => "/page/#{@n - @win}" } <
   %ul
     - for i in @min .. @n-1
       %li<
@@ -137,7 +139,7 @@ __END__
   %ul
     - if @hasmore
       %li<
-        %a#next{ :href => "/page/#{@n + @win}" } >
+        %a{ :href => "/page/#{@n + @win}" } >
     - if @n < @last
       %li<
         %a{ :href => "/page/#{@last}" } >>
@@ -149,10 +151,10 @@ __END__
 
 #bags
   %ul
-  - list_nonempty_bags_by_page(@gap, @n) do |r|
-    %li<
-      %a{ :href => "/bag/#{$dim}/#{r[:bag_id]}" }<
-        =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'
+    - list_nonempty_bags_by_page(@gap, @n) do |r|
+      %li<
+        %a{ :href => "/bag/#{$dim}/#{r[:bag_id]}" }<
+          =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'
 
 - c = Time.new.to_f
 - puts "X: #{@x - @a}\nB: #{@b - @a}\nC: #{c - @a}" if $profile
