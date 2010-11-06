@@ -12,6 +12,7 @@ $(document).ready(function() {
     f('h', 'hi')
     f('m', 'mid')
     f('l', 'low')
+    f('t', 'tin')
 
     $("div#bags > ul > li > a:first").focus();
 })

@@ -25,10 +25,17 @@ configure :production do
   $pre_dir = "prod"
 end
 
-$dim = "600x450"
 $profile = false
 
 $db = Sequel.connect('postgres://localhost')
+
+$dim = def_size()
+
+s = sizes()
+
+$size_med = s[0]
+$size_low = s[1]
+$size_tin = s[2]
 
 get '/' do
   redirect '/page/0'
@@ -172,9 +179,11 @@ __END__
     %li
       %a#hi{ :href => "/bag/hi-res/#{@id}" } hi
     %li
-      %a#mid{ :href => "/bag/840x630/#{@id}" } mid
+      %a#mid{ :href => "/bag/#{$size_med}/#{@id}" } mid
     %li
-      %a#low{ :href => "/bag/600x450/#{@id}" } low
+      %a#low{ :href => "/bag/#{$size_low}/#{@id}" } low
+    %li
+      %a#tin{ :href => "/bag/#{$size_tin}/#{@id}" } tin
   %ul
     %li
       %a#next{ :href => "/bag/#{@t}/#{Integer(@id)+1}" } >

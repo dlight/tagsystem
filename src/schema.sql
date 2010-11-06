@@ -17,8 +17,9 @@ create table config
 create unique index only_one_config on config ((1));
 
 insert into thumbnail_size values (840, 630);
-insert into thumbnail_size values (600, 450);
-insert into config values (600, 450);
+insert into thumbnail_size values (500, 375);
+insert into thumbnail_size values (200, 150);
+insert into config values (500, 375);
 
 create table file
        (file_id         serial8 primary key,
