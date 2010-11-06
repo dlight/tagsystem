@@ -1,5 +1,30 @@
-1) when adding a thumbnail that already exists, it should ignore; but now, it
-   just exits, the operation left midway
+-*- refill -*-
 
-ERROR: 23505: duplicate key value violates unique constraint "thumbnail_repo_path_key"
-Fatal error: exception PGOCaml_generic.Make(Thread).PostgreSQL_Error("ERROR: 23505: duplicate key value violates unique constraint "thumbnail_repo_path_key"", _)
+* sorting_time should take in account the least time from all containing
+  files (or at least all containing files at creation date), not just
+  the least time of stat() at the directory
+
+* doing a ts add then aborting, and trying again, might result in:
+
+  ERROR: 23503: insert or update on table "thumbnail" violates foreign
+  key constraint "thumbnail_file_id_fkey" Erro capturado:
+  PGOCaml_generic.Make(Thread).PostgreSQL_Error("ERROR: 23503: insert or
+  update on table \"thumbnail\" violates foreign key constraint
+  \"thumbnail_file_id_fkey\"", _)
+
+  hey! noo! it happens because you are doing it concurrently with
+  another ts! that is; the default locking / sharing procedure is not
+  enough
+
+* it seems that when the transaction is initiated, one has to add all
+  the files, and just after this allocate a new bag_id. is that right?
+  also, if the transaction is aborted, the db has no info about
+  duplicates, thus adding again will duplicate the repository..
+
+
+* ooh! omg! omg! it looks like the race is at thumbnail.jpg!!!!! WTF!!!
+
+
+* what means this?
+
+  Erro capturado: Sys_error("No such file or directory")
