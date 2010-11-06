@@ -6,11 +6,27 @@ require 'sass'
 
 require_relative 'db'
 
-set :environment, :production
+if "dev" == `whoami`.chomp("\n")
+  set :environment, :development
+else
+  set :environment, :production
+end
 
 set :run, true
 set :bind, '127.0.0.1'
-set :port, 1025
+
+configure :development do
+  set :port, 1026
+  $pre_dir = "dev"
+end
+
+configure :production do
+  set :port, 1026
+  $pre_dir = "prod"
+end
+
+$dim = "600x450"
+$profile = false
 
 $db = Sequel.connect('postgres://localhost')
 
@@ -29,8 +45,7 @@ get '/page/:n' do |n|
   @half = 10
 
   @n = Integer(n)
-
-  @N = 4623 # count_sets_nonempty()
+  @N = count_bags_nonempty()
 
   @x = Time.new.to_f
 
@@ -48,6 +63,10 @@ get '/page/:n' do |n|
     @max = @n + @half
   end
 
+  if @max > @last
+    @max = @last
+  end
+
   @hasless = true if @min > 0
   @hasmore = true if @max < @last
 
@@ -59,13 +78,20 @@ get '/empty' do
   haml :empty
 end
 
-get '/set/:id' do |id|
+get '/bag/:t/:id' do |t, id|
+  @t = t
   @id = id
-  haml :set
+  haml :bag
 end
 
 get '/style.css' do
   sass :style
+end
+
+helpers do
+  def menu(&b)
+    haml :menu, {}, { :arg => b }
+  end
 end
 
 enable :inline_templates
@@ -76,66 +102,151 @@ __END__
 %html
   %head
     %link{:href=>'/style.css', :rel => 'stylesheet', :type => "text/css"}
+    %script{ :src => '/jquery-1.4.2.js' }
+    %script{ :src => '/jquery.hotkeys.js' }
+    %script{ :src => '/nav.js' }
   %body
     = yield
 
-@@ page
+@@ page_menu
+%a#prev{ :href => "/page/#{Integer(@n)-1}" }
+%a#next{ :href => "/page/#{Integer(@n)+1}" }
 #menu
-  %a{ :href => "/all" } All
-  %a{ :href => "/empty" } Empty
-  |
+  %ul
+    %li<
+      %a#up{ :href => "/" } /
+    %li<
+      %a{ :href => "/all" } A
+    %li<
+      %a{ :href => "/empty" } E
+  %ul
+    -if @n > 0
+      %li<
+        %a{ :href => "/page/0" } <<
+    - if @hasless
+      %li<
+        %a{ :href => "/page/#{@n - @win}" } <
+  %ul
+    - for i in @min .. @n-1
+      %li<
+        %a{ :href => "/page/#{i}" }=i
+    %li<
+      =@n
 
-  -if @n > 0
-    %a{ :href => "/page/0" } <<
-  - if @hasless
-    %a{ :href => "/page/#{@n - @win}" } <
+    - for i in @n+1 .. @max
+      %li<
+        %a{ :href => "/page/#{i}" }=i
+  %ul
+    - if @hasmore
+      %li<
+        %a{ :href => "/page/#{@n + @win}" } >
+    - if @n < @last
+      %li<
+        %a{ :href => "/page/#{@last}" } >>
 
-  - for i in @min .. @n-1
-    %a{ :href => "/page/#{i}" }=i
+  %br{ :clear => 'left' }
 
-  - c = Time.new.to_f
-  =@n
+@@ page
+= haml :page_menu
 
-  - for i in @n+1 .. @max
-    %a{ :href => "/page/#{i}" }=i
+#bags
+  %ul
+    - list_nonempty_bags_by_page(@gap, @n) do |r|
+      %li<
+        %a{ :href => "/bag/#{$dim}/#{r[:bag_id]}" }<
+          =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'
 
-  - if @hasmore
-    %a{ :href => "/page/#{@n + @win}" } >
-  - if @n < @last
-    %a{ :href => "/page/#{@last}" } >>
+- c = Time.new.to_f
+- puts "X: #{@x - @a}\nB: #{@b - @a}\nC: #{c - @a}" if $profile
 
-  - d = Time.new.to_f
-- list_nonempty_sets_by_page(@gap, @n) do |r|
-  %p
-    %a{ :href => "/set/#{r[:id]}" }
-      =r[:dir].sub %r{.*/([^/]+/[^/]+/[^/]+)}, '\1'
+@@ bag_menu
+#menu
+  %ul
+    %li
+      %a#up{ :href => '/' } ^
+  %ul
+    %li
+      %a#prev{ :href => "/bag/#{@t}/#{Integer(@id)-1}" } <
 
-- e = Time.new.to_f
-- puts "X: #{@x - @a}\nB: #{@b - @a}\nC: #{c - @a}\nD: #{d - @a}\nE: #{e - @a}"
+  %ul
+    %li
+      %a#hi{ :href => "/bag/hi-res/#{@id}" } hi
+    %li
+      %a#mid{ :href => "/bag/840x630/#{@id}" } mid
+    %li
+      %a#low{ :href => "/bag/600x450/#{@id}" } low
+  %ul
+    %li
+      %a#next{ :href => "/bag/#{@t}/#{Integer(@id)+1}" } >
+  %br{ :clear => 'left' }
 
-
-@@ set
-%a{ :href => '/' } "Up"
-%br
-- list_files_of_set(@id) do |r|
-    %img{ :src => "http://127.0.0.1:4567/ts#{r[:path]}" }
+@@ bag
+= haml :bag_menu
+- list_files_with_type(@t, @id) do |r|
+  %img{ :src => (link_file r[:repo_path]) }
 
 @@ all
-%p=count()
-%p=count_sets_nonempty()
-%p=count_sets_empty()
-- $db.fetch("select id, dir from set") do |r|
+%a{ :href => '/' } Up
+%p="Total: #{count()}"
+%p="Nao vazio: #{count_bags_nonempty()}"
+%p="Vazio: #{count_bags_empty()}"
+- $db.fetch("select bag_id, dir from bag") do |r|
   %p
-    %a{ :href => "/set/#{r[:id]}" }
+    %a{ :href => "/bag/#{$dim}/#{r[:bag_id]}" }
       =File.basename r[:dir]
 
 @@ empty
-- list_empty_sets do |r|
+%a{ :href => '/' } Up
+- list_empty_bags do |r|
   %p
-    %a{ :href => "/set/#{r[:id]}" }
+    %a{ :href => "/bag/#{$dim}/#{r[:bag_id]}" }
       =File.basename r[:dir]
 
 @@ style
+body
+  font-family: DejaVu Sans
 #menu
-  font-family: Andale Mono, monospace
-  font-size: 130%
+  width: 100%
+  margin: 1em 0
+  padding: 0px 0.5em
+  background: #eee none
+
+  padding: 0
+  background: #fff none
+
+  font-size: 105%
+  ul
+    float: left
+    margin: 0
+    padding: 0
+    list-style-type: none
+    margin-right: 0.15em
+
+  li
+
+    margin: 0
+    padding: 0
+    float: left
+
+    width: 2.3em
+    margin-right: 0.1em
+    background: #eee none
+    text-align: center
+
+  a
+    display: block
+    width: 100%
+    text-decoration: none
+  a:hover
+    background: #ff9 none
+
+#bags
+  font-size: 105%
+  line-height: 1.2em
+  ul
+    list-style-type: none
+  a
+    color: #819F00
+    text-decoration: none
+  a:hover
+    color: #710067

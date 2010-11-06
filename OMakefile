@@ -3,4 +3,14 @@
 .PHONY: clean: .PHONY/src/clean
 
 .PHONY: mrproper: .PHONY/clean
-	rm -f .omakedb* *.omc src/*.omc bin/* html/*
+	rm -f .omakedb *.omc src/*.omc bin/*
+	rmdir -f bin dump web/log web/public web/tmp
+
+dump:
+	mkdir dump
+web/public:
+	mkdir web/public
+
+.PHONY: dirs: dump web/public
+
+.DEFAULT: .PHONY/dirs

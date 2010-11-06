@@ -3,7 +3,9 @@ BYTE_ENABLED = true
 
 USE_OCAMLFIND = true
 
-OCAMLFLAGS += -thread -syntax camlp4o
+# putting magick.cma here: ugly (and slow?)
+
+OCAMLFLAGS += -thread -syntax camlp4o -I +libMagick magick.cma
 OCAMLDEPFLAGS += -syntax camlp4o
 
 OCAMLPACKS[] =
@@ -15,11 +17,8 @@ OCAMLPACKS[] =
     fileutils
     extunix
 
-SOURCES_BATCH[] =
-    db
-    batch
-
 SOURCES_ADD[] =
+    image
     stat
     msort
     dir
@@ -29,13 +28,14 @@ SOURCES_ADD[] =
 #OCamlProgram($(BIN)/ts-batch, $(SOURCES_BATCH))
 OCamlProgram($(BIN)/ts-add, $(SOURCES_ADD))
 
-$(BIN)/ts: ts-template.sh
-    sed "s:__ROOT__:$(shell realpath $(ROOT)):" ts-template.sh > $(BIN)/ts
+$(BIN):
+	mkdir $(BIN)
+
+$(BIN)/ts: ts-template.sh $(BIN)
+    m4 -D__ROOT__="$(shell realpath $(ROOT))" ts-template.sh > $(BIN)/ts
     chmod(755, $(BIN)/ts)
 
-.PHONY: bin: $(BIN)/ts $(BIN)/ts-add
-
-.DEFAULT: bin
+.DEFAULT: $(BIN) $(BIN)/ts $(BIN)/ts-add
 
 .PHONY: clean:
 	rm -f *.cm?

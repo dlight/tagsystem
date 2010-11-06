@@ -1,0 +1,77 @@
+-*- refill -*-
+
+DO NOW
+
+* turn thumbnails into files (marked as generated = true) (that is: add
+  them in the file tables, so that they can have their own md5, etc)
+
+* for do that, it's better to save a image to a string (this requires
+  changes to ocaml-imagemagick). *but*, it is possible to change at an
+  temporary file, then mv
+
+* keeping the relevant thumbnail sizes in a table (instead of statically
+  in ts add), and make ts add query this
+
+
+WEB
+
+* creating a view for complex queries
+
+* creating a cursor + notify, for better performance
+
+* also keeping a counter for "number of bags", with a trigger
+
+* create shortcuts for common functions, like U to go up, H to see hi-res
+
+
+REPO
+
+* filename must be
+
+  mime/type/arbitrary-number/md5-size-arbitrary-comment
+
+  like
+
+  image/jpeg/1/eaba716ef8138c3832c9533c45a6dc55-55615-712x1072.jpg
+
+  for thumbnails this does not happen yet; when thumbnails are at file,
+  it will be easier. but anyway, thumbnails should not have its limits
+  associated to it, neither should it be created when it's not
+  necessary. a thumbnail can be reused for more than one entry, and if
+  the image itself fits, it can be marked as the "thumbnail" for itself.
+
+
+FSCK
+
+* ts fsck, with options; by default would check if database is 'dirty'
+  (has open bags) 
+
+* in the future, would check if the fetch log is clean; ifnot, replay
+  them 
+
+* extreme fsck: check md5sum of everything
+
+* a tool for generating missing thumbnails, and dropping irrelevant ones;
+  maybe integrated with ts fsck?
+
+  or better: this tool would be like:
+
+    ts thumbnail --add 800x600
+
+    ts thumbnail --rem 800x600
+
+    ts thumbnail --check
+
+  it would:
+
+  * modify the list of thumbnails, commit [ so that new adds would add
+    correct thumbnails ]
+
+  * begin transaction, search for all thumbnails and/or non-generated
+    images, do stuff
+
+
+MORE
+
+* ts static for creating static pages. needs some static navigation and
+  index. also an option for creating such pages *without* checking the db
