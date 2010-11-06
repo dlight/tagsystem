@@ -18,6 +18,7 @@ OCAMLPACKS[] =
     extunix
 
 SOURCES_ADD[] =
+    opt
     image
     stat
     msort
@@ -25,7 +26,6 @@ SOURCES_ADD[] =
     db
     add
 
-#OCamlProgram($(BIN)/ts-batch, $(SOURCES_BATCH))
 OCamlProgram($(BIN)/ts-add, $(SOURCES_ADD))
 
 $(BIN):
