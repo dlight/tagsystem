@@ -21,8 +21,8 @@ configure :development do
 end
 
 configure :production do
-  set :port, 1026
-  $pre_dir = "prod"
+  set :port, 1025
+  $pre_dir = "tagsystem"
 end
 
 $profile = false
