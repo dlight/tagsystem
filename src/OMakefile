@@ -29,7 +29,7 @@ SOURCES_ADD[] =
 OCamlProgram($(BIN)/ts-add, $(SOURCES_ADD))
 
 $(BIN):
-	mkdir $(BIN)
+	mkdir -p $(BIN)
 
 $(BIN)/ts: ts-template.sh $(BIN)
     m4 -D__ROOT__="$(shell realpath $(ROOT))" ts-template.sh > $(BIN)/ts
