@@ -44,37 +44,25 @@ let cookie_desc = Magic.make []
 
 let repo_dir = concat (getenv "HOME") "files"
 
-let ext_of_mime = function
-    "image/jpeg" -> "jpg"
-  | "image/png" -> "png"
-  | "image/gif" -> "gif"
-  | "text/plain"-> "txt"
-  | "text/html" -> "html"
-  | _ -> "dat"
+let tmp_dir = concat repo_dir "tmp"
 
-let name md5 size ext is_thumb info =
-  match is_thumb, info with
-    false, Some (h, w, _) ->
-      sprintf "%s-%Ld-%ldx%ld.%s" md5 size h w ext
-  | true, Some (h, w, _) ->
-      sprintf "%s-%Ld-thumbnail-%ldx%ld.%s" md5 size h w ext
-  | _ ->
-      sprintf "%s-%Ld.%s" md5 size ext
+let mkdir_tmp_dir() = mkdir tmp_dir
 
-let write_thumbnail { md5; size; ext; prev_path; dir } max_w max_h =
-  let f w h = concat dir (name md5 size ext true (Some(w, h, true))) in
-  match Image.r max_w max_h prev_path f with
-      None -> None
-    | Some (n, w', h') -> Some (n, w', h',
-                                Int32.of_int max_w,
-                                Int32.of_int max_h)
+let anal_mime = function
+    "image/jpeg" -> true, "jpg"
+  | "image/png" -> true, "png"
+  | "image/gif" -> true, "gif"
+  | "text/plain"-> false, "txt"
+  | "text/html" -> false, "html"
+  | _ -> false, "dat"
 
-let thumbnails = [(840, 630); (600, 450)]
+let isimg_of_mime s = fst(anal_mime s)
+let ext_of_mime s = snd (anal_mime s)
 
-let write_thumbnails file =
-  List.map (fun (w, h) -> write_thumbnail file w h) thumbnails
+let name md5 size s s2 ext =
+  sprintf "%s-%Ld%s%s.%s" md5 size s s2 ext
 
-let new_file bag_id origin pos =
+let new_file (bag_id : int64) (pos : int) s2 origin =
   let md5 = Digest.to_hex (Digest.file origin) in
   let size = Int64.of_int (size_of origin) in
   let mime = Magic.file cookie_mime origin in
@@ -85,7 +73,13 @@ let new_file bag_id origin pos =
 
   let image = Image.info origin in
 
-  let repo_name = name md5 size ext false image in
+  let repo_name = match image with
+      None -> name md5 size "" s2 ext
+    | Some (w, h, _) -> name md5 size (sprintf "-%ldx%ld" w h) s2 ext in
+
+  let path = concat dirn repo_name in
+
+    printf "%s -> %s\n%!" origin path;
 
     {
       bag_id;
@@ -100,9 +94,30 @@ let new_file bag_id origin pos =
       prev_path = origin;
       dir = dirn;
       name = repo_name;
-      path = concat dirn repo_name;
+      path;
       image
     }
+
+let write_thumbnail callback max_w max_h
+    { bag_id; md5; size; ext; prev_path; dir; image } =
+
+  let p_w, p_h = match image with
+      None -> raise (Failure "write_thumbnail")
+    | Some (w, h, _) -> w, h in
+
+  let p = concat tmp_dir "thumbnail.jpg" in
+  match Image.r max_w max_h prev_path (fun w h -> p) with
+      None -> ()
+    | Some (n, _, _) ->
+        let s2 = sprintf "-thumbnail-%s-%Ld-%ldx%ld" md5 size p_w p_h in
+
+        let file = new_file bag_id 0 s2 n in
+          callback file max_w max_h (* gambiarra; vai adicionar ao db,
+                                       e remover o arquivo.. *)
+
+let add_thumbnails callback sizes file =
+  if isimg_of_mime file.mime then
+    List.iter (fun (w, h) -> write_thumbnail callback w h file) sizes
 
 let mkdir_f file =
   mkdir file.dir
@@ -110,9 +125,8 @@ let mkdir_f file =
 let link_f file =
   link file.prev_path file.path 
 
-(*let info file =
-  try Left (new file file) with
-      e -> Right e*)
+let mv_f file =
+  Sys.rename file.prev_path file.path
 
 let readlink f =
   try Some (Unix.readlink f) with
@@ -136,7 +150,7 @@ let files dir =
 
 let compose bag_id dir acc i f =
   let f' = concat dir f in
-    (new_file bag_id f' i)::acc
+    (new_file bag_id i "" f')::acc
 
 let of_dir bag_id files dir =
   Array.fold_lefti (compose bag_id dir) [] files

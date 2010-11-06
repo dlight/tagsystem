@@ -24,7 +24,8 @@ let open_image file =
     try Some (read_image ~filename:file) with
         Failure _ -> None
 
-let resize' maxw maxh img f =
+let resize' maxw' maxh' img f =
+  let maxw, maxh = Int32.to_int maxw', Int32.to_int maxh' in
   let w, h = new_size (maxw, maxh) (size img) in
   let img' = Fun.resize ~width:w ~height:h ~filter:Lanczos ~blur:1.0 () img in
     Imper.set_compression_quality img' 85;

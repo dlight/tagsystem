@@ -13,10 +13,14 @@ TOOLS="$dir_autoset/tools"
 c="$1"
 shift
 
-# just for this branch
-export PGDATABASE=dev_testing_risos
-
 case "$c" in
+    add-dir)
+        for i in "$@"; do
+            for j in "$i"/*; do
+                echo
+                $0 add "$j"
+            done
+        done;;
     clean) $0 rm; $0 createdb;;
     add) "$BIN"/ts-add "$@";;
     rm) rm -rf "$files_dir"/?*;;

@@ -11,6 +11,9 @@ let read_first = function
     [] -> None
   | a::_ -> Some a
 
+let thumbnail_sizes db =
+  PGSQL(db) "select width, height from thumbnail_size"
+
 let insert_bag db dir =
   let min, now, a, m, c = Stat.min_now_file dir in
   let l = PGSQL(db) "insert into bag (dir,
@@ -29,6 +32,11 @@ let select_file_param db file =
                             file_size = $size" in
     read_first l
 
+let select_and_do db file f =
+  match select_file_param db file with
+      None -> f file; None
+    | Some a -> Some a
+
 let insert_bag_file db file_id file =
   let { bag_id; pos; prev_name } = file in
   PGSQL(db) "insert into bag_file (bag_id, pos, file_id, file_name)
@@ -36,55 +44,45 @@ let insert_bag_file db file_id file =
 let close_bag db bag_id =
   PGSQL(db) "update bag set is_open = false where bag_id = $bag_id"
 
-let insert_image db (width, height, quality) =
-  let l = PGSQL(db) "insert into image (width, height, quality) values
-            ($width, $height, $quality) returning image_id" in
-  read_id l
+let insert_image db file_id (width, height, quality) =
+  PGSQL(db) "insert into image (file_id, width, height, quality) values
+               ($file_id, $width, $height, $quality)"
 
-let insert_maybe_image db = function
-    Some data -> Some (insert_image db data)
-  | None -> None
-
-let insert_file db file  =
+let insert_just_file db file =
   let { md5; mime; magic;
         size; path; image } = file in
-
-  let image_id = insert_maybe_image db image in
 
   let _, now, a, m, c = Stat.min_now_file path in
 
   let l = PGSQL(db)
     "insert into file
-       (md5, mime, magic, file_size, repo_path, image_id,
-        file_insert_time, file_access_time, file_update_time,
-        file_atime, file_ctime, file_mtime)
+       (md5, mime, magic, file_size, repo_path,
+        file_insert_time, file_access_time,
+        file_update_time, file_atime,
+        file_ctime, file_mtime)
      values
-       ($md5, $mime, $magic, $size, $path, $?image_id, $now,
-        $now, $now, $a, $c, $m)
+       ($md5, $mime, $magic, $size, $path,
+        $now, $now, $now, $a, $c, $m)
      returning file_id" in
     read_id l
 
-let insert_thumb db file_id n w h max_w max_h =
-  let image_id = insert_image db (w, h, 0l) in
+let insert_file db file =
+  let file_id = insert_just_file db file in
+
+    match file.image with
+        Some data -> insert_image db file_id data; file_id
+      | None -> file_id
+
+let just_thumb db file_id parent_id w h =
   PGSQL(db) "insert into thumbnail
-              (file_id, image_id, max_width, max_height, scaled, repo_path)
+              (file_id, parent_id, max_width, max_height)
              values
-              ($file_id, $image_id, $max_w, $max_h, true, $n)"
+              ($file_id, $parent_id, $w, $h)"
 
-let insert_thumbs db file_id thumbs =
-  let f = function
-      None -> ()
-    | Some (n, w, h, max_w, max_h) ->
-        insert_thumb db file_id n w h max_w max_h in
-  List.iter f thumbs
+let just_add_file db file f =
+  match select_and_do db file f with
+      Some a -> a
+    | None -> insert_file db file
 
-let fid_if_exists db file = function
-    Some a -> a
-  | None -> insert_file db file
-
-let insert_file_rel db file_id' thumbs file =
-    let file_id = fid_if_exists db file file_id' in
-      insert_thumbs db file_id thumbs;
-      insert_bag_file db file_id file
-
-let connect () = PGOCaml.connect ()
+let connect () =
+  PGOCaml.connect ()
