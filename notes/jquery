@@ -1,0 +1,6 @@
+I imported jquery 1.4.2 and jquery.hotkeys from:
+  
+  https://github.com/jeresig/jquery.hotkeys
+
+The history is relatively short, but I preferred to just copy the source
+to web/public

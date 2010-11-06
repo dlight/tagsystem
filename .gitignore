@@ -9,7 +9,6 @@ bin/
 dump/
 web/log
 web/tmp
-web/public
 
 *.omc
 .omakedb
