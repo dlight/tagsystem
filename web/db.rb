@@ -1,3 +1,13 @@
+def def_size()
+  a = $db.fetch("select def_width, def_height from config").first;
+  "#{a[:def_width]}x#{a[:def_height]}"
+end
+
+def sizes()
+  a = $db.fetch("select width, height from thumbnail_size order by width * height desc").first(3)
+  a.map { |a| "#{a[:width]}x#{a[:height]}" }
+end
+
 helpers do
   def link_file repo_path
     repo_path.sub %r{^/[^/]+/[^/]+/[^/]+}, "http://127.0.0.1:4567/#{$pre_dir}"
