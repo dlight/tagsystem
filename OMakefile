@@ -7,9 +7,7 @@
 	rmdir -f bin dump web/log web/public web/tmp
 
 dump:
-	mkdir dump
-web/public:
-	mkdir web/public
+	mkdir -p dump
 
 .PHONY: dirs: dump web/public
 
