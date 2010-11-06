@@ -1,13 +1,16 @@
+open Batteries
 open Dir
 open Dir.File
 open Db
 open Printf
 
+module O = Opt
+
 module U = ExtUnix.Specific
 
 let link_file file =
     try link_f file with e ->
-      Printf.printf "Aiai link: %s -> %s\n\n" file.prev_path file.path;
+      Printf.fprintf stderr "Aiai link: %s -> %s\n\n" file.prev_path file.path;
       raise e
 
 let thumb_aux db parent_id file max_w max_h =
@@ -31,18 +34,21 @@ let add_dir db sizes dir =
       [||] -> raise (Failure "empty directory")
     | fs -> add db sizes dir fs
 
-let arg = match Sys.argv with
-    [|a|] -> None
-  | r -> Some r.(1)
+let do_it db sizes d =
+  try mkdir_tmp_dir();
+    add_dir db sizes d with
+        e -> fprintf stderr "Erro capturado: ";
+          (Printexc.print stderr e);
+          fprintf stderr "\n%!"
 
-let handle d =
+let handle db sizes d =
+  O.p O.Alot "Adding %s ..\n" d;
+  do_it db sizes d;
+  O.p O.Abit "%s added.\n" d
+
+let _ =
   let db = connect() in
   let sizes = thumbnail_sizes db in
-    printf "Adding %s ..\n" d;
-    mkdir_tmp_dir();
-    add_dir db sizes d;
-    printf "%s added.\n" d
+  O.parse();
 
-let _ = match arg with
-    None -> print_endline "Rs"
-  | Some a -> handle (U.realpath a)
+  List.iter (handle db sizes) !O.arg

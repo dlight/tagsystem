@@ -4,7 +4,7 @@ open File
 open Printf
 open Sys
 
-
+module O = Opt
 
 module File =
 struct
@@ -79,7 +79,7 @@ let new_file (bag_id : int64) (pos : int) s2 origin =
 
   let path = concat dirn repo_name in
 
-    printf "%s -> %s\n%!" origin path;
+    O.p O.Alot "%s -> %s\n%!" origin path;
 
     {
       bag_id;
