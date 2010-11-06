@@ -56,4 +56,4 @@ let _ =
   let sizes = thumbnail_sizes db in
   O.parse();
 
-  List.iter (handle db sizes) !O.arg
+  List.iter (handle db sizes) (U.realpath !O.arg)
