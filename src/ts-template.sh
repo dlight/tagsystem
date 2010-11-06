@@ -13,6 +13,9 @@ TOOLS="$dir_autoset/tools"
 c="$1"
 shift
 
+# just for this branch
+export PGDATABASE=dev_testing_risos
+
 case "$c" in
     clean) $0 rm; $0 createdb;;
     add) "$BIN"/ts-add "$@";;

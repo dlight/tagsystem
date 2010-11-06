@@ -1,10 +1,23 @@
-drop table if exists bag_file, file, thumbnail, image, bag cascade;
+drop table if exists thumbnail_type, config, bag_file, file, thumbnail, image, bag cascade;
 
-create table image
-       (image_id        serial8 primary key,
-       width            int not null,
-       height           int not null,
-       quality          int not null);
+create table thumbnail_type
+       (width           int,
+        height          int,
+        primary key (width, height));
+
+insert into thumbnail_type values (840, 630);
+insert into thumbnail_type values (600, 450);
+
+create table config
+        -- def_width and def_height being null means hi-res is default
+        -- (I could use the value "0" instead.. like 0x0 means hi-res)
+       (def_width       int,
+        def_height      int,
+
+        foreign key (def_width, def_height)
+        references thumbnail_type(width, height));
+
+create unique index only_one_config on config ((1));
 
 create table file
        (file_id         serial8 primary key,
@@ -13,8 +26,6 @@ create table file
         magic           text not null,
         file_size       int8 not null,
         repo_path       text not null unique,
-
-        image_id        int8 references image,
 
         -- access time isn't necessarily updated..
         file_insert_time     timestamp not null default current_timestamp,
@@ -27,21 +38,28 @@ create table file
 
         unique (md5, mime, file_size));
 
--- should be a file? (should have its own size, md5..)
+create table image
+       (file_id        serial8 primary key references file on delete cascade,
+        width           int not null,
+        height          int not null,
+        quality         int not null);
 
--- it will be a file when one can save a image from imagemagick
--- to a string
+-- if file_id = parent_id, image was not scaled
+-- it references image in order to prevent non-images to have thumbnails
 create table thumbnail
-        -- file_id references the id of its *parent*
-       (file_id         int8 not null references file on delete cascade,
-        image_id        int8 not null references image on delete cascade,
+        -- file_id references its own id
+       (file_id         int8 not null primary key references file
+                                      on delete cascade,
+        image_id        int8 not null references image
+                                      on delete cascade,
+        parent_id       int8 not null references file,
         max_width       int not null,
         max_height      int not null,
 
-        scaled          bool,
-        repo_path       text not null unique,
+        unique (parent_id, max_height, max_width),
 
-        primary key (file_id, max_height, max_width));
+        foreign key (max_width, max_height)
+        references thumbnail_type(width, height));
 
 create table bag
        (bag_id       serial8 primary key,
