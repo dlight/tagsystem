@@ -35,9 +35,14 @@ let add_dir db sizes dir =
     | fs -> add db sizes dir fs
 
 let do_it db sizes d =
-  try mkdir_tmp_dir();
-    add_dir db sizes d with
-        e -> fprintf stderr "Erro capturado: ";
+  try
+    PGOCaml.begin_work db;
+    mkdir_tmp_dir();
+    add_dir db sizes d;
+    PGOCaml.commit db
+  with
+        e -> PGOCaml.rollback db;
+          fprintf stderr "Erro capturado: ";
           (Printexc.print stderr e);
           fprintf stderr "\n%!"
 
